@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -136,12 +138,20 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
-
+:root {
+  --font-nunito-sans: "Nunito Sans", "sans-serif" !important;
+}
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    font-family: var(
+      --font-nunito-sans
+    ) !important; /* Add here for all elements */
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(
+      --font-nunito-sans
+    ) !important; /* And here for good measure */
   }
 }

@@ -8,6 +8,7 @@ export default function StatsCard({
   image, // Optional image prop for the profile icon (e.g., for Revenue card)
   layout = "row", // Optional prop to specify layout ("row" or "col"), defaults to "row"
   className = "", // Optional custom class for styling
+  cardLayout = "row",
 }) {
   return (
     <Card
@@ -16,14 +17,18 @@ export default function StatsCard({
       <CardHeader>
         <CardTitle className="text-black">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent
+        className={`${
+          cardLayout === "row" ? "flex justify-between " : "flex flex-col gap-2"
+        }`}
+      >
         {Object.entries(stats).map(([key, value]) => (
           <div
             key={key}
             className={`${
               layout === "col"
-                ? "flex flex-col items-start gap-1"
-                : "flex justify-between items-center"
+                ? "flex flex-col items-start gap-1 p-5"
+                : "flex justify-between items-center "
             }`}
           >
             <span className="text-sm font-medium text-gray-600 capitalize">

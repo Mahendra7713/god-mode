@@ -11,7 +11,12 @@ import {
 export default function AccountSizeFilter({ data }) {
   return (
     <div className="flex flex-row items-center gap-2.5">
-      <Label>Account Size</Label>
+      <Label
+        className="text-base font-semibold text-nowrap
+"
+      >
+        Account Size
+      </Label>
       <Select>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select a Account Size" />

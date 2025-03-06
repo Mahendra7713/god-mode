@@ -11,7 +11,12 @@ import {
 export default function PlanTypeFiler({ data }) {
   return (
     <div className="flex flex-row items-center gap-2.5">
-      <Label>Plan Type</Label>
+      <Label
+        className="text-base font-semibold text-nowrap
+"
+      >
+        Plan Type
+      </Label>
       <Select>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select a Plan Type" />

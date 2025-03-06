@@ -23,7 +23,9 @@ export default function ReusableBarChart({
   description, // Optional description
   footerText, // Optional footer text or stats (e.g., trend, description)
   className = "", // Optional custom class for styling
-  barWidth = 10, // Optional bar width in pixels, defaults to 20
+  barWidth = 10, // Optional bar width in pixels, defaults to 10
+  customHeight = 300, // Optional custom height, defaults to 300px
+  customWidth = "100%", // Optional custom width, defaults to 100% of parent or can be a number in pixels
 }) {
   // Use default empty array if data is undefined
   const chartData = data || [];
@@ -34,6 +36,10 @@ export default function ReusableBarChart({
   const domain = config.domain || [0, "auto"]; // Default Y-axis domain
   const ticks = config.ticks || [0, 50, 100, 150, 200, 250, 300]; // Default ticks for Y-axis, matching image
   const tickFormatter = config.tickFormatter || ((value) => value); // Default formatter, can be overridden
+
+  // Normalize customWidth to handle both pixel values and percentages
+  const widthValue =
+    typeof customWidth === "number" ? `${customWidth}px` : customWidth;
 
   return (
     <Card
@@ -48,15 +54,18 @@ export default function ReusableBarChart({
         )}
       </CardHeader>
       <CardContent>
-        <ChartContainer config={config}>
+        <ChartContainer
+          config={config}
+          className={`h-[300px] w-full`} // Apply custom width and height
+        >
           <BarChart
             accessibilityLayer
             data={chartData}
-            barGap={2}
+            barGap={0}
             barCategoryGap={10}
+            width={typeof customWidth === "number" ? customWidth : "100%"} // Dynamic width for BarChart
+            height={customHeight} // Fixed height for BarChart
           >
-            {" "}
-            {/* Adjust gaps for spacing */}
             <CartesianGrid
               vertical={false}
               stroke="#E5E7EB"

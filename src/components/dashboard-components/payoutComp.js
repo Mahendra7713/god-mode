@@ -8,7 +8,10 @@ import { Card, CardHeader } from "../ui/card";
 import WorldMap from "../WorldMap";
 import ReusableTable from "../reusableTable";
 import ReusableAreaChart from "../reusableLineChart";
-
+import icon1 from "../icons/noOfApvReq.svg";
+import icon2 from "../icons/totalAmountPaid.svg";
+import icon3 from "../icons/totalAmountReq.svg";
+import icon4 from "../icons/noOfPayout.svg";
 export default function Payout() {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const planTypeData = [
@@ -75,22 +78,22 @@ export default function Payout() {
     {
       title: "Total Amount Requested",
       value: "$428,752",
-      image: "/icons/requested-amount-icon.png", // Replace with the actual path to a dollar/money icon image
+      image: icon3,
     },
     {
       title: "Total Amount Paid",
       value: "$124,512",
-      image: "/icons/paid-amount-icon.png", // Replace with the actual path to a dollar/check icon image
+      image: icon2,
     },
     {
       title: "No. Of Payout Requests",
       value: "1547",
-      image: "/icons/payout-requests-icon.png", // Replace with the actual path to a request/list icon image
+      image: icon4,
     },
     {
       title: "No. Of Approved Request",
       value: "1025",
-      image: "/icons/approved-requests-icon.png", // Replace with the actual path to an approved/check icon image
+      image: icon1,
     },
   ];
   const handleCountrySelect = (countryName) => {
@@ -255,14 +258,15 @@ export default function Payout() {
         <StatsCard data={payoutStatsData} className="w-full" />
       </div>
       <div className="flex flex-row gap-5">
-        <div className="w-1/2">
+        <Card className="w-1/2 flex flex-col items-start justify-center p-5">
+          <h2>Payouts by country</h2>
           <WorldMap
-            userWidth={500}
-            userHeight={250}
+            userWidth={420}
+            userHeight={470}
             onCountrySelect={handleCountrySelect}
           />{" "}
           <p>Currently Selected Country: {selectedCountry || "None"}</p>{" "}
-        </div>
+        </Card>
         <Card className="w-full p-5 flex flex-col gap-5">
           <CardHeader className="p-0">
             <h4>Payouts by product</h4>
@@ -282,10 +286,12 @@ export default function Payout() {
           />
         </Card>
       </div>
-      <div>
+      <div className="flex flex-col gap-5">
         <ReusableAreaChart
+          customHeight={400} // ✅ Set height dynamically
+          customWidth={1200}
           data={salesPayoutsData}
-          title="Sales vs Payouts"
+          title="Sales and Payout by Country"
           description="2024 Overview"
           config={salesPayoutsConfig} // Pass dynamic configuration for this chart
           toggle={false} // Disable tabs for simplicity

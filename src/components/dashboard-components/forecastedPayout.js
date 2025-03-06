@@ -1,7 +1,10 @@
+"use client";
+
 import AccountSizeFilter from "../accountFilter";
-import PlanTypeFiler from "../planFilter";
+import PlanTypeFiler from "../planFilter"; // Note: Typo in "Filer" should be "Filter" if applicable
 import DateRangeFilter from "../rangeFilter";
-import ReusableBubbleChart from "../reusableBubbleChart";
+import ReusableD3BubbleChart from "../reusableBubbleChart";
+
 import TextStatsCard from "../textStatCard";
 import { Card, CardHeader } from "../ui/card";
 
@@ -19,7 +22,6 @@ export default function ForecastedPayout() {
     { x: "Feb", y: 350, series: "125K" },
     { x: "Feb", y: 280, series: "150K" },
     { x: "Feb", y: 450, series: "200K" },
-    // ... (continue with similar data for Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec as shown earlier)
     { x: "Mar", y: 200, series: "25K" },
     { x: "Mar", y: 250, series: "50K" },
     { x: "Mar", y: 150, series: "100K" },
@@ -108,6 +110,7 @@ export default function ForecastedPayout() {
     "Stage 3 Pass Rates": "55%",
     "Total % Funded From Gross Number Purchased": "8%",
   };
+
   const planTypeData = [
     {
       name: "Stage 1",
@@ -122,6 +125,7 @@ export default function ForecastedPayout() {
       value: "funded",
     },
   ];
+
   const accountSizeData = [
     {
       name: "5K",
@@ -148,23 +152,24 @@ export default function ForecastedPayout() {
       value: "200000",
     },
   ];
+
   return (
-    <Card>
-      <CardHeader className="flex flex-col">
-        {" "}
+    <Card className="p-5 flex flex-col gap-5">
+      <CardHeader className="flex flex-col p-0">
         <div className="flex flex-row items-center gap-2.5">
           <PlanTypeFiler data={planTypeData} />
           <AccountSizeFilter data={accountSizeData} />
           <DateRangeFilter />
         </div>
       </CardHeader>
-      <div className="container mx-auto p-4 space-y-6">
+      <div className="container mx-auto space-y-6">
         {/* Revenue Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="">
           <TextStatsCard
             title="Revenue"
             stats={revenueStats}
             layout="col" // Use column layout for Revenue card
+            cardLayout="row"
           />
         </div>
 
@@ -174,17 +179,19 @@ export default function ForecastedPayout() {
             title="Actual Payout"
             stats={actualPayoutStats}
             layout="row"
+            cardLayout="col"
           />{" "}
           {/* Use row layout */}
           <TextStatsCard
             title="Forecasted Payout"
             stats={forecastedPayoutStats}
             layout="row"
+            cardLayout="col"
           />{" "}
           {/* Use row layout */}
         </div>
       </div>
-      <ReusableBubbleChart
+      <ReusableD3BubbleChart
         data={forecastedPayoutData}
         title="Forecasted No of Payout"
         description="By Month and Payout Amount"

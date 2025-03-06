@@ -88,7 +88,7 @@ export default function ReusableTable({
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full overflow-hidden">
       <Table className="w-full bg-white text-black border-gray-200 shadow-md">
         <TableHeader>
           <TableRow className="text-left">

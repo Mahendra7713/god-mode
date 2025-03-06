@@ -14,7 +14,8 @@ export default function ContentLayout({ children }) {
 
   const formattedPathname = pathname
     .replace(/^\/+/, "") // Remove leading slashes
-    .replace(/-/g, " ");
+    .replace(/-/g, " ") // Replace hyphens with spaces
+    .replace(/\//g, ""); // Remove any remaining slashes
 
   const userData = {
     name: "Admin",
@@ -30,7 +31,7 @@ export default function ContentLayout({ children }) {
         <header className="w-full p-10 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
           <div className="w-full flex items-center gap-2 justify-between ">
             <div className="flex items-center gap-2">
-              <SidebarTrigger className="-ml-1" />
+              {/* <SidebarTrigger className="-ml-1" /> */}
               <p className="capitalize">{formattedPathname}</p>
             </div>
 

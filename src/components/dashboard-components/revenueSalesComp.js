@@ -1,9 +1,13 @@
 "use client";
 import { useState } from "react";
 import AccountSizeFilter from "../accountFilter";
+import icon1 from "../icons/newCustomers.svg";
+import icon2 from "../icons/returningCustomers.svg";
+import icon3 from "../icons/totalOrders.svg";
+import icon4 from "../icons/totalSales.svg";
 import PlanTypeFiler from "../planFilter";
 import DateRangeFilter from "../rangeFilter";
-import ReusableAreaChart from "../reusableLineChart"; // Ensure this points to the updated ReusableAreaChart
+import ReusableD3LineChart from "../reusableLineChart";
 import ReusableTable from "../reusableTable";
 import StatsCard from "../statsCard";
 import { Card, CardHeader } from "../ui/card";
@@ -80,18 +84,18 @@ export default function RevenueSales() {
   ];
 
   const chartData = [
-    { month: "January", custom: 50000, previous: 20000 },
-    { month: "February", custom: 75000, previous: 30000 },
-    { month: "March", custom: 150000, previous: 40000 },
-    { month: "April", custom: 250000, previous: 50000 },
+    { month: "Jan", custom: 50000, previous: 20000 },
+    { month: "Feb", custom: 75000, previous: 30000 },
+    { month: "Mar", custom: 150000, previous: 40000 },
+    { month: "Apr", custom: 250000, previous: 50000 },
     { month: "May", custom: 300000, previous: 60000 },
-    { month: "June", custom: 200000, previous: 70000 },
-    { month: "July", custom: 180000, previous: 80000 },
-    { month: "August", custom: 150000, previous: 90000 },
-    { month: "September", custom: 120000, previous: 100000 },
-    { month: "October", custom: 100000, previous: 110000 },
-    { month: "November", custom: 80000, previous: 120000 },
-    { month: "December", custom: 100000, previous: 140000 },
+    { month: "Jun", custom: 200000, previous: 70000 },
+    { month: "Jul", custom: 180000, previous: 80000 },
+    { month: "Aug", custom: 150000, previous: 90000 },
+    { month: "Sept", custom: 120000, previous: 100000 },
+    { month: "Oct", custom: 100000, previous: 110000 },
+    { month: "Nov", custom: 80000, previous: 120000 },
+    { month: "Dec", custom: 100000, previous: 140000 },
   ];
 
   // Define dynamic tab options
@@ -104,22 +108,22 @@ export default function RevenueSales() {
     {
       title: "Total Sales",
       value: "$428,752",
-      image: "/icons/sales-icon.png",
+      image: icon4,
     },
     {
       title: "Total Orders",
       value: "1547",
-      image: "/icons/orders-icon.png",
+      image: icon3,
     },
     {
       title: "New Customers",
       value: "2874",
-      image: "/icons/new-customers-icon.png",
+      image: icon1,
     },
     {
       title: "Returning Customers",
       value: "52%",
-      image: "/icons/returning-customers-icon.png",
+      image: icon2,
     },
   ];
   const chartConfig = {
@@ -148,19 +152,29 @@ export default function RevenueSales() {
         </div>
       </CardHeader>
       <div className="flex flex-row gap-5 ">
-        <div className="flex flex-col gap-5 ">
+        <Card className="flex flex-col gap-5 w-full p-5 max-w-[342px]">
           <StatsCard data={statsData} />
-        </div>
-        <Card className="w-full  p-5">
-          <Tabs defaultValue="map" className="flex flex-col gap-5 items-end">
-            <TabsList className="flex w-min">
-              <TabsTrigger value="map">Map</TabsTrigger>
-              <TabsTrigger value="table">Table</TabsTrigger>
-            </TabsList>
-            <TabsContent value="map" className="w-full">
-              <div className="w-full flex flex-row gap-5 justify-between">
-                <WorldMap onCountrySelect={handleCountrySelect} />
-                <div className="w-full">
+        </Card>
+        <Card className="w-full h-full p-5">
+          <Tabs
+            defaultValue="map"
+            className="flex flex-col h-full gap-5 items-end"
+          >
+            <div className="flex flex-row items-center justify-between w-full">
+              <h4>Revenue by country</h4>
+              <TabsList className="flex w-min">
+                <TabsTrigger value="map">Map</TabsTrigger>
+                <TabsTrigger value="table">Table</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="map" className="w-full h-full">
+              <div className="w-full flex flex-row gap-5 h-full justify-between">
+                <WorldMap
+                  // userWidth={500}
+                  userHeight={300}
+                  onCountrySelect={handleCountrySelect}
+                />
+                <div className="w-full max-w-[278px]">
                   <p>Currently Selected Country: {selectedCountry || "None"}</p>{" "}
                 </div>
                 {/* White text */}
@@ -177,7 +191,7 @@ export default function RevenueSales() {
       <div className="flex flex-col gap-5 items-end">
         <DateRangeFilter />
         <div className="flex flex-row gap-5 w-full">
-          <ReusableAreaChart
+          <ReusableD3LineChart
             data={chartData}
             title="Sales / Order per Product"
             description="Custom (Jan 1, 2024 - Dec 31, 2024)"
@@ -189,10 +203,13 @@ export default function RevenueSales() {
             toggle={true} // Enable the tabs
             onToggleChange={handleChartToggle} // Handle tab changes
             config={chartConfig} // Pass dynamic configuration for this chart
+            customHeight={300} // Ensure height is 300px
+            customWidth={560} // Match the width in your layout
           />
-          <ReusableAreaChart
+
+          <ReusableD3LineChart
             data={chartData}
-            title="Sales / Order per Product"
+            title="Sales / Order per Plans"
             description="Custom (Jan 1, 2024 - Dec 31, 2024)"
             totals={{
               custom: "$52,346,256.00",
@@ -202,6 +219,8 @@ export default function RevenueSales() {
             toggle={true} // Enable the tabs
             onToggleChange={handleChartToggle} // Handle tab changes
             config={chartConfig} // Pass dynamic configuration for this chart
+            customHeight={300} // Ensure height is 300px
+            customWidth={560} // Match the width in your layout
           />
         </div>
       </div>
