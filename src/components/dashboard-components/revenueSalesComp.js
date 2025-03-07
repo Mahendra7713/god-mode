@@ -142,17 +142,17 @@ export default function RevenueSales() {
       {" "}
       {/* Dark background to match chart theme */}
       <CardHeader className="flex flex-col p-0">
-        <div className="flex flex-row items-center justify-between">
-          <h3>Revenue Sales</h3> {/* White text for dark background */}
-          <div className="flex flex-row items-center gap-2.5">
+        <div className="flex flex-col  items-start gap-2 justify-between xl:flex-row xl:items-center ">
+          <h3 className="font-extrabold text-xl">Revenue Sales</h3>{" "}
+          <div className="flex flex-row flex-wrap items-center gap-2.5 xl:flex-nowrap">
             <PlanTypeFiler data={planTypeData} />
             <AccountSizeFilter data={accountSizeData} />
             <DateRangeFilter />
           </div>
         </div>
       </CardHeader>
-      <div className="flex flex-row gap-5 ">
-        <Card className="flex flex-col gap-5 w-full p-5 max-w-[342px]">
+      <div className="flex flex-col gap-5 xl:flex-row">
+        <Card className="grid grid-cols-2 gap-5 w-full p-5 xl:max-w-[342px] xl:flex xl:flex-col">
           <StatsCard data={statsData} />
         </Card>
         <Card className="w-full h-full p-5">
@@ -168,7 +168,7 @@ export default function RevenueSales() {
               </TabsList>
             </div>
             <TabsContent value="map" className="w-full h-full">
-              <div className="w-full flex flex-row gap-5 h-full justify-between">
+              <div className="w-full flex flex-col gap-5 h-full justify-between lg:flex-row">
                 <WorldMap
                   // userWidth={500}
                   userHeight={300}
@@ -188,9 +188,9 @@ export default function RevenueSales() {
           </Tabs>
         </Card>
       </div>
-      <div className="flex flex-col gap-5 items-end">
+      <div className="flex flex-col  gap-5 items-end">
         <DateRangeFilter />
-        <div className="flex flex-row gap-5 w-full">
+        <div className="flex flex-col gap-5 w-full xl:flex-row">
           <ReusableD3LineChart
             data={chartData}
             title="Sales / Order per Product"

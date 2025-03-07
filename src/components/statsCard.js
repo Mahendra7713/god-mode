@@ -1,11 +1,14 @@
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 
-function StatsCard({ data }) {
+function StatsCard({ data, layout }) {
   return (
     <>
       {data?.map((item, index) => (
-        <Card key={index} className="flex items-center p-4 space-x-4 w-full">
+        <Card
+          key={index}
+          className="flex items-center flex-row p-4 space-x-4 w-full"
+        >
           <div className="flex-shrink-0">
             <Image
               src={item.image}
