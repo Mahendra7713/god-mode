@@ -1,4 +1,6 @@
-module.exports = {
-  output: "export", // Ensures static export
-  trailingSlash: true, // Fixes some routing issues
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
 };
+
+module.exports = nextConfig;
