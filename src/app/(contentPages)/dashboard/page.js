@@ -1,3 +1,5 @@
+"use client";
+
 import DailyStats from "@/components/dashboard-components/dailyStats";
 import ForecastedPayout from "@/components/dashboard-components/forecastedPayout";
 import OpenProfitData from "@/components/dashboard-components/openProfit";
