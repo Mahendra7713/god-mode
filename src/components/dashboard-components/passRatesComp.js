@@ -98,7 +98,7 @@ export default function PassRates({ data }) {
           </Tabs>
         </div>
         <div className="flex flex-col items-center gap-2.5">
-          <div className="w-full flex-col flex gap-2.5 flex-row lg:flex-row">
+          <div className="w-full flex-col flex gap-2.5 lg:flex-row">
             <ReusableSunburstChart
               title="Stage 1 Pass"
               description="Performance breakdown"

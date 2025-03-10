@@ -5,37 +5,44 @@ import * as d3 from "d3";
 import worldCountries from "../app/data/world-countries.json"; // Import the GeoJSON
 import { Card } from "./ui/card";
 
-export default function WorldMap({ onCountrySelect, userWidth, userHeight }) {
+export default function WorldMap({ onCountrySelect }) {
   const svgRef = useRef(null);
-  const tooltipRef = useRef(null); // Ref for the tooltip div
-  const [selectedCountry, setSelectedCountry] = useState(null); // State to store the clicked country name
+  const tooltipRef = useRef(null);
+  const containerRef = useRef(null);
+  const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const zoomRef = useRef(d3.zoomIdentity);
 
-  // Use userWidth and userHeight directly, with fallbacks for defaults
-  const width = userWidth || 500; // Default width if not provided
-  const height = userHeight || 250; // Default height if not provided
+  // Update dimensions dynamically based on parent size
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        setDimensions({
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight,
+        });
+      }
+    };
 
-  const zoomRef = useRef(d3.zoomIdentity); // Store zoom state
+    updateSize(); // Set initial size
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
 
   useEffect(() => {
     if (!svgRef.current || !tooltipRef.current) return;
 
+    const { width, height } = dimensions;
     const svg = d3
       .select(svgRef.current)
-      .attr("width", width)
-      .attr("height", height);
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet");
 
-    svg.selectAll("*").remove(); // Clear previous map to avoid duplication
+    svg.selectAll("*").remove(); // Clear previous map
 
-    const projection = d3
-      .geoMercator()
-      .scale(100)
-      .translate([width / 2, height / 2]);
+    const projection = d3.geoMercator().scale(150).center([0, 20]);
     const path = d3.geoPath().projection(projection);
-
-    projection
-      .scale(150)
-      .center(d3.geoCentroid(worldCountries))
-      .translate([width / 2, height / 2]);
+    projection.translate([width / 2, height / 2]);
 
     // Draw the map
     const paths = svg
@@ -50,57 +57,65 @@ export default function WorldMap({ onCountrySelect, userWidth, userHeight }) {
       .attr("stroke", "#fff")
       .attr("stroke-width", 0.5)
       .on("click", (event, d) => {
-        const bounds = d3.geoBounds(d);
-        const centroid = d3.geoCentroid(d);
-        const [[x0, y0], [x1, y1]] = bounds;
-
-        const countryWidth = x1 - x0;
-        const countryHeight = y1 - y0;
-        const scale = Math.max(
-          0.1,
-          Math.min(
-            0.8,
-            0.3 / Math.max(countryWidth / width, countryHeight / height)
-          )
-        );
-
-        // Ensure the country is centered but does NOT over-zoom
-        const newTransform = d3.zoomIdentity
-          .translate(width / 2, height / 2)
-          .scale(scale) // Adjust scale factor to prevent excessive zoom
-          .translate(-projection(centroid)[0], -projection(centroid)[1]);
-
-        svg.transition().duration(750).call(zoom.transform, newTransform);
-
-        zoomRef.current = newTransform; // Store zoom state
-
         setSelectedCountry(d.properties.NAME);
-
-        if (onCountrySelect) {
-          onCountrySelect(d.properties.NAME);
-        }
+        if (onCountrySelect) onCountrySelect(d.properties.NAME);
       })
       .on("mouseover", (event, d) => {
         if (d.properties.NAME !== selectedCountry) {
-          // Show both fill change and tooltip with country name on hover
-          d3.select(event.currentTarget).attr("fill", "#F99"); // Highlight in pink
+          d3.select(event.currentTarget).attr("fill", "#F99");
           const tooltip = d3.select(tooltipRef.current);
-          tooltip
-            .style("visibility", "visible")
-            .style("left", event.pageX + 10 + "px")
-            .style("top", event.pageY - 10 + "px")
-            .text(d.properties.NAME);
+          if (tooltip.node()) {
+            const centroid = d3.geoCentroid(d); // Get the centroid of the country
+            const projectedPoint = projection(centroid); // Project centroid to screen coordinates
+            const x = projectedPoint[0]; // X coordinate in SVG space
+            const y = projectedPoint[1]; // Y coordinate in SVG space
+            const tooltipWidth = tooltip.node().offsetWidth || 100; // Default width if not measurable
+            const tooltipHeight = tooltip.node().offsetHeight || 20; // Default height if not measurable
+
+            // Adjust to center the tooltip over the centroid
+            const centeredX = x - tooltipWidth / 2;
+            const centeredY = y - tooltipHeight;
+
+            // Ensure tooltip stays within container bounds
+            const boundedX = Math.max(
+              0,
+              Math.min(centeredX, width - tooltipWidth)
+            );
+            const boundedY = Math.max(
+              0,
+              Math.min(centeredY, height - tooltipHeight)
+            );
+
+            tooltip
+              .style("visibility", "visible")
+              .style("left", `${boundedX}px`)
+              .style("top", `${boundedY}px`)
+              .text(d.properties.NAME);
+            console.log(
+              "Tooltip shown for:",
+              d.properties.NAME,
+              "at",
+              { x: boundedX, y: boundedY },
+              "centroid:",
+              { x: projectedPoint[0], y: projectedPoint[1] },
+              "container:",
+              { width, height }
+            ); // Debug log
+          }
         }
       })
       .on("mouseout", (event, d) => {
         if (d.properties.NAME !== selectedCountry) {
-          // Revert fill and hide tooltip on mouseout
-          d3.select(event.currentTarget).attr("fill", "#ccc"); // Revert to gray
-          d3.select(tooltipRef.current).style("visibility", "hidden");
+          d3.select(event.currentTarget).attr("fill", "#ccc");
+          const tooltip = d3.select(tooltipRef.current);
+          if (tooltip.node()) {
+            tooltip.style("visibility", "hidden");
+            console.log("Tooltip hidden for:", d.properties.NAME); // Debug log
+          }
         }
       });
 
-    // Zoom behavior with persistence
+    // Zoom behavior
     const zoom = d3
       .zoom()
       .scaleExtent([0.5, 8])
@@ -108,31 +123,25 @@ export default function WorldMap({ onCountrySelect, userWidth, userHeight }) {
         svg.selectAll("path").attr("transform", event.transform);
       });
 
-    svg.call(zoom).call(zoom.transform, zoomRef.current); // Apply stored zoom state
-
-    // Create tooltip div (hidden by default)
-    d3.select(tooltipRef.current)
-      .style("position", "absolute")
-      .style("visibility", "hidden")
-      .style("background", "#fff")
-      .style("border", "1px solid #ccc")
-      .style("padding", "5px")
-      .style("border-radius", "4px")
-      .style("font-size", "12px")
-      .style("color", "#000")
-      .style("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)");
+    svg.call(zoom).call(zoom.transform, zoomRef.current);
 
     return () => {
-      if (svgRef.current) {
-        svg.selectAll("*").remove();
-      }
+      svg.selectAll("*").remove();
     };
-  }, [selectedCountry, width, height, onCountrySelect]); // Re-run effect when selectedCountry, width, height, or onCountrySelect changes
+  }, [dimensions, selectedCountry, onCountrySelect]);
 
   return (
-    <Card className="flex justify-center align-middle items-center flex-col bg-white w-full text-black border-gray-200 shadow-md overflow-hidden">
-      <svg ref={svgRef} width={width} height={height}></svg>
-      <div ref={tooltipRef} /> {/* Tooltip div for hover information */}
+    <Card
+      ref={containerRef}
+      className="flex justify-center items-center flex-col bg-white w-full h-full text-black border-gray-200 shadow-md overflow-hidden relative" // Added relative for positioning context
+      style={{ position: "relative" }} // Ensure positioning context
+    >
+      <svg ref={svgRef} className="w-full h-full" />
+      <div
+        ref={tooltipRef}
+        className="absolute bg-white border border-gray-300 p-1 rounded shadow-md text-sm pointer-events-none"
+        style={{ visibility: "hidden", zIndex: 10 }} // Added zIndex to ensure it appears above map
+      />
       {selectedCountry && (
         <p className="text-black">Selected Country: {selectedCountry}</p>
       )}

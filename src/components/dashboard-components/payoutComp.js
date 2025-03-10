@@ -245,31 +245,32 @@ export default function Payout() {
   return (
     <Card className="flex flex-col gap-5 p-5">
       <CardHeader className="flex flex-col p-0">
-        <div className="flex flex-row items-center justify-between">
-          <h3>Payouts</h3> {/* White text for dark background */}
-          <div className="flex flex-row items-center gap-2.5">
+        <div className="flex flex-col  items-start gap-2 justify-between xl:flex-row xl:items-center ">
+          <h3 className="font-extrabold text-xl">Payouts</h3>{" "}
+          <div className="flex flex-row flex-wrap items-center gap-2.5 xl:flex-nowrap">
             <PlanTypeFiler data={planTypeData} />
             <AccountSizeFilter data={accountSizeData} />
             <DateRangeFilter />
           </div>
         </div>
       </CardHeader>
-      <div className="flex flex-row gap-5">
+      <div className="flex flex-row flex-wrap gap-5 xl:flex-nowrap">
         <StatsCard data={payoutStatsData} className="w-full" />
       </div>
-      <div className="flex flex-row gap-5">
-        <Card className="w-1/2 flex flex-col items-start justify-center p-5">
-          <h2>Payouts by country</h2>
-          <WorldMap
-            userWidth={420}
-            userHeight={470}
-            onCountrySelect={handleCountrySelect}
-          />{" "}
+      <div className="flex flex-col gap-5 xl:flex-row">
+        <Card className="w-full max-w-full gap-3 flex flex-col items-start justify-between p-5 h-full xl:max-w-[420px]">
+          <h2 className="text-xl font-bold ">Payouts by country</h2>
+          <div className="w-full h-full max-h-[600px]">
+            <WorldMap
+              className="w-full"
+              onCountrySelect={handleCountrySelect}
+            />{" "}
+          </div>
           <p>Currently Selected Country: {selectedCountry || "None"}</p>{" "}
         </Card>
         <Card className="w-full p-5 flex flex-col gap-5">
           <CardHeader className="p-0">
-            <h4>Payouts by product</h4>
+            <h4 className="text-xl font-bold ">Payouts by product</h4>
           </CardHeader>
           <ReusableTable
             serverSide={false}
@@ -292,7 +293,6 @@ export default function Payout() {
           customWidth={1200}
           data={salesPayoutsData}
           title="Sales and Payout by Country"
-          description="2024 Overview"
           config={salesPayoutsConfig} // Pass dynamic configuration for this chart
           toggle={false} // Disable tabs for simplicity
         />

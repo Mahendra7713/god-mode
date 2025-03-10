@@ -156,14 +156,16 @@ export default function ForecastedPayout() {
   return (
     <Card className="p-5 flex flex-col gap-5">
       <CardHeader className="flex flex-col p-0">
-        <div className="flex flex-row items-center gap-2.5">
-          <PlanTypeFiler data={planTypeData} />
-          <AccountSizeFilter data={accountSizeData} />
-          <DateRangeFilter />
+        <div className="flex flex-col  items-start gap-2 justify-between xl:flex-row xl:items-center ">
+          <h3 className="font-extrabold text-xl">Payouts</h3>{" "}
+          <div className="flex flex-row flex-wrap items-center gap-2.5 xl:flex-nowrap">
+            <PlanTypeFiler data={planTypeData} />
+            <AccountSizeFilter data={accountSizeData} />
+            <DateRangeFilter />{" "}
+          </div>
         </div>
       </CardHeader>
       <div className="container mx-auto space-y-6">
-        {/* Revenue Section */}
         <div className="">
           <TextStatsCard
             title="Revenue"
@@ -174,7 +176,7 @@ export default function ForecastedPayout() {
         </div>
 
         {/* Actual Payout and Forecasted Payout Sections */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <TextStatsCard
             title="Actual Payout"
             stats={actualPayoutStats}

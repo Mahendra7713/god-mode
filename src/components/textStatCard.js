@@ -19,7 +19,9 @@ export default function StatsCard({
       </CardHeader>
       <CardContent
         className={`${
-          cardLayout === "row" ? "flex justify-between " : "flex flex-col gap-2"
+          cardLayout === "row"
+            ? "flex flex-row flex-wrap gap-5 xl:flex-nowrap"
+            : "flex flex-col gap-2"
         }`}
       >
         {Object.entries(stats).map(([key, value]) => (

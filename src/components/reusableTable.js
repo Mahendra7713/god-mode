@@ -93,7 +93,7 @@ export default function ReusableTable({
         <TableHeader>
           <TableRow className="text-left">
             {showSelectAll && (
-              <TableHead className="w-[50px] bg-gray-100">
+              <TableHead className="flex items-center bg-gray-100">
                 <input
                   type="checkbox"
                   checked={getPaginatedData().every((row) =>
@@ -107,7 +107,9 @@ export default function ReusableTable({
             {columns.map((column, index) => (
               <TableHead
                 key={index}
-                className={`text-left bg-gray-100 ${column.width || ""}`}
+                className={`text-left font-semibold text-[10px] bg-gray-100 ${
+                  column.width || ""
+                }`}
               >
                 {column.name}
               </TableHead>
@@ -118,7 +120,7 @@ export default function ReusableTable({
           {getPaginatedData().map((row) => (
             <TableRow key={row[rowId]} className="hover:bg-gray-100">
               {showSelectAll && (
-                <TableCell className="p-2">
+                <TableCell className="p-2 flex items-center">
                   <input
                     type="checkbox"
                     checked={selectedRows.includes(row[rowId])}
@@ -130,7 +132,9 @@ export default function ReusableTable({
               {columns.map((column, colIndex) => (
                 <TableCell
                   key={colIndex}
-                  className={`text-left font-medium p-2 ${column.width || ""}`}
+                  className={`text-left text-[10px] font-normal p-2 ${
+                    column.width || ""
+                  }`}
                 >
                   {row[column.key] || "N/A"}
                 </TableCell>
@@ -157,9 +161,9 @@ export default function ReusableTable({
               )
             }
             disabled={pagination.current === 1}
-            className="px-3 py-1 rounded-md bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-200"
+            className=" text-black "
           >
-            Previous
+            {"<"}
           </button>
           {Array.from(
             { length: Math.ceil(pagination.total / pagination.pageSize) },
@@ -191,9 +195,9 @@ export default function ReusableTable({
               pagination.current ===
               Math.ceil(pagination.total / pagination.pageSize)
             }
-            className="px-3 py-1 rounded-md bg-gray-200 text-black hover:bg-gray-300 disabled:bg-gray-200"
+            className=" text-black"
           >
-            Next
+            {">"}
           </button>
         </div>
 

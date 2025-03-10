@@ -333,7 +333,11 @@ export default function ReusableD3LineChart({
               </Tabs>
             ) : (
               <>
-                {title && <CardTitle className="text-black">{title}</CardTitle>}
+                {title && (
+                  <CardTitle className="text-black text-xl font-bold">
+                    {title}
+                  </CardTitle>
+                )}
                 {description && (
                   <CardDescription className="text-gray-600">
                     {description}

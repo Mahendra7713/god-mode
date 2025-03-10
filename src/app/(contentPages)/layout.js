@@ -28,7 +28,7 @@ export default function ContentLayout({ children }) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="w-full p-10 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        <header className="w-full p-10 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 max-w-[1600px] m-auto ">
           <div className="w-full flex items-center gap-2 justify-between ">
             <div className="flex items-center gap-2">
               {/* <SidebarTrigger className="-ml-1" /> */}

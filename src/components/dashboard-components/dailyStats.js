@@ -216,7 +216,7 @@ export default function DailyStats() {
 
   return (
     <Card className="flex flex-col gap-5 p-5 h-full">
-      <div className="flex flex-row items-center justify-between gap-5">
+      <div className="flex flex-row flex-wrap items-center justify-between gap-5 xl:flex-nowrap">
         <ReusableBarChart
           data={payoutsApprovedData}
           title="Total Payouts Approved"
@@ -232,7 +232,7 @@ export default function DailyStats() {
           footerText="Showing total payouts approved for each product step"
         />
       </div>
-      <div className="flex flex-row items-center justify-between gap-5">
+      <div className="flex flex-row flex-wrap items-center justify-between gap-5 xl:flex-nowrap">
         <ReusableBarChart
           data={payoutsApprovedData}
           title="Total Payouts Approved"

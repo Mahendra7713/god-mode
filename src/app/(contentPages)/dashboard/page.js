@@ -7,7 +7,7 @@ import RevenueSales from "@/components/dashboard-components/revenueSalesComp";
 
 export default function Dashboard() {
   return (
-    <div className="flex flex-col gap-5 px-10 py-7 h-full w-full ">
+    <div className="flex flex-col gap-5 px-10 py-7 h-full w-full max-w-[1600px] m-auto">
       <PassRates />
       <RevenueSales />
       <Payout />

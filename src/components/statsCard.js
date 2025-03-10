@@ -18,9 +18,14 @@ function StatsCard({ data, layout }) {
               className="rounded-full"
             />
           </div>
-          <div>
-            <h5 className="font-semibold text-lg">{item.title}</h5>
-            <p className="text-muted-foreground">{item.value}</p>
+          <div className="flex flex-col gap-0.5">
+            <h5 className=" text-base font-medium">{item.title}</h5>
+            <p
+              className="font-semibold text-xl
+"
+            >
+              {item.value}
+            </p>
           </div>
         </Card>
       ))}
