@@ -12,6 +12,7 @@ import icon1 from "../icons/noOfApvReq.svg";
 import icon2 from "../icons/totalAmountPaid.svg";
 import icon3 from "../icons/totalAmountReq.svg";
 import icon4 from "../icons/noOfPayout.svg";
+import OpenProfitData from "./openProfit";
 export default function Payout() {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const planTypeData = [
@@ -224,7 +225,7 @@ export default function Payout() {
     xAxis: "month", // X-axis key
     series: [
       { label: "Sales", color: "#FFA500", dataKey: "sales" }, // Match sales data key
-      { label: "Payout", color: "#FFFF99", dataKey: "payouts" }, // Match payouts data key
+      { label: "Payout", color: "#D7B26D", dataKey: "payouts" }, // Match payouts data key
     ],
     domain: [0, 300000], // Optional: Adjust Y-axis domain for your data
     ticks: [0, 50000, 100000, 150000, 200000, 250000, 300000], // Optional: Adjust Y-axis ticks for your data
@@ -238,7 +239,7 @@ export default function Payout() {
     },
     previous: {
       label: "Payout",
-      color: "#FFFF99", // Light yellow for Previous (matches image)
+      color: "#D7B26D", // Light yellow for Previous (matches image)
     },
   };
 
@@ -296,6 +297,9 @@ export default function Payout() {
           config={salesPayoutsConfig} // Pass dynamic configuration for this chart
           toggle={false} // Disable tabs for simplicity
         />
+      </div>
+      <div>
+        <OpenProfitData />
       </div>
     </Card>
   );

@@ -1,7 +1,7 @@
+// NavMain.jsx
 "use client";
 
 import { ChevronRight } from "lucide-react";
-
 import {
   Collapsible,
   CollapsibleContent,
@@ -19,9 +19,20 @@ import {
 } from "@/components/ui/sidebar";
 
 export function NavMain({ items }) {
+  const handleScroll = (e, url) => {
+    e.preventDefault();
+    const id = url.replace("#", "");
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
   return (
     <SidebarGroup>
-      {/* <SidebarGroupLabel>Platform</SidebarGroupLabel> */}
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -32,14 +43,19 @@ export function NavMain({ items }) {
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                  {/* <ChevronRight
-                    className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" /> */}
+                <SidebarMenuButton tooltip={item.title} asChild>
+                  <a href={item.url} onClick={(e) => handleScroll(e, item.url)}>
+                    {item.icon && <item.icon className="h-4 w-4 mr-2" />}
+                    <span>{item.title}</span>
+                    {/* Uncomment if you want the chevron */}
+                    {/* <ChevronRight
+                      className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                    /> */}
+                  </a>
                 </SidebarMenuButton>
               </CollapsibleTrigger>
-              <CollapsibleContent>
+              {/* If you want sub-items, you can add them here */}
+              {/* <CollapsibleContent>
                 <SidebarMenuSub>
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
@@ -51,7 +67,7 @@ export function NavMain({ items }) {
                     </SidebarMenuSubItem>
                   ))}
                 </SidebarMenuSub>
-              </CollapsibleContent>
+              </CollapsibleContent> */}
             </SidebarMenuItem>
           </Collapsible>
         ))}

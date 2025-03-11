@@ -157,7 +157,7 @@ export default function ForecastedPayout() {
     <Card className="p-5 flex flex-col gap-5">
       <CardHeader className="flex flex-col p-0">
         <div className="flex flex-col  items-start gap-2 justify-between xl:flex-row xl:items-center ">
-          <h3 className="font-extrabold text-xl">Payouts</h3>{" "}
+          <h3 className="font-extrabold text-xl">Payout Forecasting</h3>{" "}
           <div className="flex flex-row flex-wrap items-center gap-2.5 xl:flex-nowrap">
             <PlanTypeFiler data={planTypeData} />
             <AccountSizeFilter data={accountSizeData} />

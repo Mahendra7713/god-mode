@@ -1,10 +1,15 @@
+// AppSidebar.jsx
 "use client";
 
 import {
   AudioWaveform,
+  Banknote,
+  ChartColumnBig,
   Command,
   GalleryVerticalEnd,
-  SquareTerminal,
+  HandCoins,
+  TicketCheck,
+  TrendingUpDown,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -18,7 +23,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-// This is sample data.
+// This is the sample data with complete teams array
 const data = {
   user: {
     name: "Admin",
@@ -28,7 +33,7 @@ const data = {
   teams: [
     {
       name: "Project 1",
-      logo: GalleryVerticalEnd,
+      logo: GalleryVerticalEnd, // Using the imported icon component directly
       plan: "project 1",
     },
     {
@@ -44,10 +49,30 @@ const data = {
   ],
   navMain: [
     {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: SquareTerminal,
+      title: "Pass Rates",
+      url: "#pass-rates",
+      icon: TicketCheck,
       isActive: true,
+    },
+    {
+      title: "Revenue Sales",
+      url: "#revenue-sales",
+      icon: Banknote,
+    },
+    {
+      title: "Payouts",
+      url: "#payout",
+      icon: HandCoins,
+    },
+    {
+      title: "Payout Forecasting",
+      url: "#forecasted-payout",
+      icon: TrendingUpDown,
+    },
+    {
+      title: "Daily Stats",
+      url: "#daily-stats",
+      icon: ChartColumnBig,
     },
   ],
 };

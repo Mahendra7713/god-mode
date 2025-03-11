@@ -1,6 +1,6 @@
-"use client"; // Use client-side rendering for D3.js interactivity
+"use client";
 
-import { useRef, useEffect, useState } from "react"; // Add useRef, useEffect for D3.js
+import { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 import {
   Card,
@@ -9,129 +9,116 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"; // Adjust path as needed
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"; // Import Tabs components
+} from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function ReusableD3LineChart({
-  data, // Required for plotting (array of objects with x-axis and series data)
-  config = {}, // Optional chart configuration (xAxis, series, etc.), defaults to empty object
-  title = "D3.js Line Chart", // Default title
-  description = "", // Optional description
-  totals, // Optional totals (object with dataKey values, defaults to undefined)
-  type = "Series", // Optional type, defaults to "Series" if provided
-  toggle = false, // Optional toggle for tabs, defaults to false
-  onToggleChange, // Optional callback for toggle changes
-  chartConfigDefault, // Optional default chart configuration (legacy structure with custom/previous)
-  customHeight = 300, // Fixed height at 300px (default and enforced)
-  customWidth, // Optional width (if provided, overrides dynamic width)
+  data,
+  config = {},
+  title = "D3.js Line Chart",
+  description = "",
+  totals,
+  type = "Series",
+  toggle = false,
+  onToggleChange,
+  chartConfigDefault,
+  customHeight = 300,
+  customWidth,
 }) {
-  const chartRef = useRef(null); // Ref for the SVG element
-  const tooltipRef = useRef(null); // Ref for the tooltip div
-  const containerRef = useRef(null); // Ref for the parent container to measure width
-  const [chartType, setChartType] = useState(type); // State to manage the tab value (Sales/Order) if toggle is used
-  const [width, setWidth] = useState(customWidth || 1100); // State to manage dynamic width
+  const chartRef = useRef(null);
+  const tooltipRef = useRef(null);
+  const containerRef = useRef(null);
+  const [chartType, setChartType] = useState(type);
+  const [width, setWidth] = useState(customWidth || 1100);
 
   // Normalize data for D3.js
   const chartData = data || [];
   const datasets = [];
 
-  // Normalize config: convert chartConfigDefault (legacy structure) or use config.series
+  // Normalize config
   let finalConfig = { ...config };
   if (chartConfigDefault) {
-    // Map chartConfigDefault (with custom/previous) to D3.js datasets
     datasets.push({
       label: chartConfigDefault.custom?.label || "Sales",
-      dataKey: "custom", // Explicitly set dataKey for totals lookup
+      dataKey: "custom",
       data: chartData.map((item) => ({
         x: item[finalConfig.xAxis || "month"] || "N/A",
-        y: item.custom || 0, // Use 'custom' directly to match chartData
+        y: item.custom || 0,
       })),
       color: chartConfigDefault.custom?.color || "#FFA500",
     });
     datasets.push({
       label: chartConfigDefault.previous?.label || "Payout",
-      dataKey: "previous", // Explicitly set dataKey for totals lookup
+      dataKey: "previous",
       data: chartData.map((item) => ({
         x: item[finalConfig.xAxis || "month"] || "N/A",
-        y: item.previous || 0, // Use 'previous' directly to match chartData
+        y: item.previous || 0,
       })),
       color: chartConfigDefault.previous?.color || "#FFFF99",
     });
   } else if (finalConfig.series) {
-    // Use series from config if provided (e.g., salesPayoutsConfig)
     finalConfig.series.forEach((seriesItem) => {
       datasets.push({
         label: seriesItem.label || `Series ${datasets.length + 1}`,
-        dataKey: seriesItem.dataKey, // Explicitly set dataKey for totals lookup
+        dataKey: seriesItem.dataKey,
         data: chartData.map((item) => ({
           x: item[finalConfig.xAxis || "month"] || "N/A",
-          y: item[seriesItem.dataKey] || 0, // Extract data for this series
+          y: item[seriesItem.dataKey] || 0,
         })),
         color:
           seriesItem.color ||
-          `#${Math.floor(Math.random() * 16777215).toString(16)}`, // Default random color
+          `#${Math.floor(Math.random() * 16777215).toString(16)}`,
       });
     });
   }
 
-  // Fallback if no config or chartConfigDefault is provided (minimal functionality)
   if (datasets.length === 0) {
     datasets.push({
       label: "Default Series",
-      dataKey: "y", // Default dataKey for totals
+      dataKey: "y",
       data: chartData.map((item) => ({
         x: item[finalConfig.xAxis || "month"] || "N/A",
-        y: item.y || 0, // Fallback to 'y' key if no series defined
+        y: item.y || 0,
       })),
-      color: "#FFA500", // Default color
+      color: "#FFA500",
     });
   }
 
-  // Handle tab change and notify parent if onToggleChange is provided
   const handleTabChange = (newType) => {
     setChartType(newType);
     if (onToggleChange) {
-      onToggleChange(newType); // Notify parent of the change
+      onToggleChange(newType);
     }
   };
 
-  // Update width when the container resizes or on mount
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
         const parentWidth = containerRef.current.offsetWidth;
-        setWidth(parentWidth || customWidth || 1100); // Use parent width or fallback to customWidth or 1100
+        setWidth(parentWidth || customWidth || 1100);
       }
     };
 
-    // Initial width update
     updateWidth();
-
-    // Add resize observer for dynamic width changes
     const resizeObserver = new ResizeObserver(updateWidth);
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
-    // Clean up observer on unmount
     return () => {
       resizeObserver.disconnect();
     };
-  }, [customWidth]); // Re-run when customWidth changes
+  }, [customWidth]);
 
-  // Initialize or update D3.js chart
   useEffect(() => {
     if (!chartRef.current || !tooltipRef.current) return;
 
-    // Clear previous content to prevent duplication
     d3.select(chartRef.current).selectAll("*").remove();
 
-    // Set up SVG dimensions
     const margin = { top: 20, right: 20, bottom: 40, left: 40 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = customHeight - margin.top - margin.bottom;
 
-    // Create SVG
     const svg = d3
       .select(chartRef.current)
       .attr("width", width)
@@ -139,56 +126,54 @@ export default function ReusableD3LineChart({
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Create tooltip div (hidden by default)
     const tooltip = d3
       .select(tooltipRef.current)
       .style("position", "absolute")
       .style("visibility", "hidden")
-      .style("background", "#fff")
-      .style("border", "1px solid #ccc")
-      .style("padding", "5px")
-      .style("border-radius", "4px")
+      .style("background", "#333")
+      .style("color", "#fff")
+      .style("border", "none")
+      .style("padding", "8px 12px")
+      .style("border-radius", "6px")
       .style("font-size", "12px")
-      .style("color", "#000")
-      .style("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)");
+      .style("font-family", "Arial, sans-serif")
+      .style("box-shadow", "0 4px 8px rgba(0, 0, 0, 0.2)")
+      .style("pointer-events", "none")
+      .style("z-index", "10");
 
-    // Scales
     const xScale = d3
       .scalePoint()
-      .domain(datasets[0].data.map((d) => d.x)) // Use x values from first dataset
+      .domain(datasets[0].data.map((d) => d.x))
       .range([0, innerWidth]);
 
     const yScale = d3
       .scaleLinear()
       .domain([
         0,
-        d3.max(datasets, (d) => d3.max(d.data, (d) => d.y)) || 300000, // Dynamic Y domain based on max value, match your data
+        d3.max(datasets, (d) => d3.max(d.data, (d) => d.y)) || 300000,
       ])
       .range([innerHeight, 0]);
 
-    // Add X-axis
     svg
       .append("g")
       .attr("transform", `translate(0,${innerHeight})`)
-      .call(d3.axisBottom(xScale).tickSize(0)) // No tick lines
+      .call(d3.axisBottom(xScale).tickSize(0))
       .selectAll("text")
-      .attr("fill", "#000") // Black text for light background
+      .attr("fill", "#000")
       .attr("font-size", "12px");
 
-    // Add Y-axis
     svg
       .append("g")
       .call(
         d3
           .axisLeft(yScale)
-          .ticks(6) // Adjust number of ticks
-          .tickFormat((d) => `$${d / 1000}K`) // Format Y-axis ticks
+          .ticks(6)
+          .tickFormat((d) => `$${d / 1000}K`)
       )
       .selectAll("text")
-      .attr("fill", "#000") // Black text for light background
+      .attr("fill", "#000")
       .attr("font-size", "12px");
 
-    // Add grid lines
     svg
       .append("g")
       .attr("class", "grid")
@@ -197,16 +182,15 @@ export default function ReusableD3LineChart({
         d3.axisBottom(xScale).tickSize(-innerHeight).tickFormat("").ticks(12)
       )
       .selectAll("line")
-      .attr("stroke", "#ccc"); // Light gray grid lines for light background
+      .attr("stroke", "#ccc");
 
     svg
       .append("g")
       .attr("class", "grid")
       .call(d3.axisLeft(yScale).tickSize(-innerWidth).tickFormat("").ticks(6))
       .selectAll("line")
-      .attr("stroke", "#ccc"); // Light gray grid lines for light background
+      .attr("stroke", "#ccc");
 
-    // Draw lines for each dataset
     datasets.forEach((dataset) => {
       const line = d3
         .line()
@@ -221,7 +205,6 @@ export default function ReusableD3LineChart({
         .attr("stroke-width", 2)
         .attr("d", line);
 
-      // Add points (dots) for each data point with tooltips
       svg
         .selectAll(`.dot-${dataset.label}`)
         .data(dataset.data)
@@ -229,76 +212,60 @@ export default function ReusableD3LineChart({
         .append("circle")
         .attr("cx", (d) => xScale(d.x))
         .attr("cy", (d) => yScale(d.y))
-        .attr("r", 4) // Default point radius
+        .attr("r", 6)
         .attr("fill", dataset.color)
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1)
         .on("mouseover", (event, d) => {
-          // Show tooltip on hover
+          const chartRect = chartRef.current.getBoundingClientRect();
+          const tooltipNode = tooltipRef.current;
+          const tooltipRect = tooltipNode.getBoundingClientRect();
+
+          let left = event.pageX + 15;
+          let top = event.pageY - 30;
+
+          if (left + tooltipRect.width > chartRect.right) {
+            left = event.pageX - tooltipRect.width - 15;
+          }
+          if (top < chartRect.top) {
+            top = event.pageY + 15;
+          }
+
           tooltip
             .style("visibility", "visible")
-            .style("left", event.pageX + 10 + "px")
-            .style("top", event.pageY - 10 + "px")
+            .style("left", left + "px")
+            .style("top", top + "px")
             .html(
-              `${dataset.label}<br>Value: $${d.y / 1000}K<br>Month: ${d.x}`
-            ); // Display label, value, and x-value (month)
+              `<strong>${dataset.label}</strong><br>Value: $${(
+                d.y / 1000
+              ).toFixed(1)}K<br>Month: ${d.x}`
+            );
 
           d3.select(event.currentTarget)
             .transition()
             .duration(200)
-            .attr("r", 6); // Larger on hover
+            .attr("r", 8);
         })
         .on("mouseout", (event, d) => {
-          // Hide tooltip on mouseout
           tooltip.style("visibility", "hidden");
           d3.select(event.currentTarget)
             .transition()
             .duration(200)
-            .attr("r", 4); // Back to default
+            .attr("r", 6);
         });
     });
 
-    // Add legend (optional, based on totals)
-    if (totals) {
-      const legend = svg
-        .selectAll(".legend")
-        .data(datasets)
-        .enter()
-        .append("g")
-        .attr("class", "legend")
-        .attr("transform", (d, i) => `translate(0,${i * 20})`);
-
-      legend
-        .append("rect")
-        .attr("x", innerWidth - 100)
-        .attr("y", 5)
-        .attr("width", 12)
-        .attr("height", 12)
-        .attr("fill", (d) => d.color);
-
-      legend
-        .append("text")
-        .attr("x", innerWidth - 85)
-        .attr("y", 14)
-        .text((d) => d.label)
-        .attr("fill", "#000") // Black text for light background
-        .attr("font-size", "12px");
-    }
-
-    // Clean up on unmount or when dependencies change
     return () => {
       if (chartRef.current) {
         d3.select(chartRef.current).selectAll("*").remove();
       }
     };
-  }, [data, config, chartConfigDefault, title, customHeight, width]); // Re-run when these change
+  }, [data, config, chartConfigDefault, title, customHeight, width]);
 
   return (
     <div ref={containerRef} className="w-full">
       <Card className="w-full bg-white shadow-md border-gray-200">
-        {" "}
-        {/* Light background, fixed */}
         <CardHeader className="flex flex-col items-start justify-between">
-          {" "}
-          {/* Flexible layout for title/description or tabs */}
           <div className="w-full">
             {toggle && title && description ? (
               <Tabs
@@ -312,22 +279,18 @@ export default function ReusableD3LineChart({
                 </TabsList>
                 <TabsContent value="Sales">
                   <div>
-                    <CardTitle className="text-black">{title}</CardTitle>{" "}
-                    {/* Black text for light background */}
+                    <CardTitle className="text-black">{title}</CardTitle>
                     <CardDescription className="text-gray-600">
                       {description}
-                    </CardDescription>{" "}
-                    {/* Gray text for description */}
+                    </CardDescription>
                   </div>
                 </TabsContent>
                 <TabsContent value="Order">
                   <div>
-                    <CardTitle className="text-black">{title}</CardTitle>{" "}
-                    {/* Black text for light background */}
+                    <CardTitle className="text-black">{title}</CardTitle>
                     <CardDescription className="text-gray-600">
                       {description}
-                    </CardDescription>{" "}
-                    {/* Gray text for description */}
+                    </CardDescription>
                   </div>
                 </TabsContent>
               </Tabs>
@@ -358,17 +321,28 @@ export default function ReusableD3LineChart({
           <svg
             ref={chartRef}
             style={{
-              width: "100%", // Set to 100% to fill parent width
-              height: customHeight, // Fixed height at 300px
+              width: "100%",
+              height: customHeight,
             }}
           />
-          <div ref={tooltipRef} /> {/* Tooltip div for hover information */}
+          <div ref={tooltipRef} />
         </CardContent>
-        {totals && (
-          <CardFooter className="flex flex-col items-start gap-2 text-sm text-black">
-            {" "}
-            {/* Black text for light background, optional */}
-            <div className="flex flex-row gap-2 font-medium leading-none">
+        <CardFooter className="flex flex-col items-start gap-2 text-sm text-black">
+          {/* Legend Section */}
+          <div className="flex flex-row gap-4 flex-wrap w-full justify-center">
+            {datasets.map((dataset, index) => (
+              <span key={dataset.label} className="flex items-center gap-2">
+                <span
+                  className="w-4 h-4 rounded-full"
+                  style={{ backgroundColor: dataset.color }}
+                ></span>
+                <span className="text-black">{dataset.label}</span>
+              </span>
+            ))}
+          </div>
+          {/* Totals Section (if provided) */}
+          {totals && (
+            <div className="flex flex-row gap-2 font-medium justify leading-none">
               {datasets.map((dataset, index) => (
                 <span key={dataset.label} className="flex items-center gap-1">
                   <span
@@ -379,11 +353,8 @@ export default function ReusableD3LineChart({
                 </span>
               ))}
             </div>
-            {/* <div className="leading-none text-gray-500">
-              Showing total {type.toLowerCase()} for the last 12 months
-            </div> */}
-          </CardFooter>
-        )}
+          )}
+        </CardFooter>
       </Card>
     </div>
   );

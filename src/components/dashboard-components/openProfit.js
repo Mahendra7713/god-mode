@@ -118,9 +118,11 @@ export default function OpenProfitData() {
   ];
 
   return (
-    <Card className="h-full p-5 flex flex-col gap-5">
+    <div className="h-full flex flex-col gap-5">
       <CardHeader className="p-0">
-        <h3 className="">Open Profit on Active Qualified Accounts</h3>
+        <h3 className="font-extrabold text-xl">
+          Open Profit on Active Qualified Accounts
+        </h3>
       </CardHeader>
       <div>
         <ReusableTable
@@ -134,6 +136,6 @@ export default function OpenProfitData() {
           rowId="id"
         />
       </div>
-    </Card>
+    </div>
   );
 }

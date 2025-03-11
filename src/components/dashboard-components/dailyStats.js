@@ -1,10 +1,53 @@
 "use client";
 
+import AccountSizeFilter from "../accountFilter";
+import PlanTypeFiler from "../planFilter";
+import DateRangeFilter from "../rangeFilter";
 import ReusableBarChart from "../reusableBarChart";
 import ReusableTable from "../reusableTable";
-import { Card } from "../ui/card";
+import { Card, CardHeader } from "../ui/card";
 
 export default function DailyStats() {
+  const planTypeData = [
+    {
+      name: "Stage 1",
+      value: "stage_1",
+    },
+    {
+      name: "Stage 2",
+      value: "stage_2",
+    },
+    {
+      name: "Funded",
+      value: "funded",
+    },
+  ];
+  const accountSizeData = [
+    {
+      name: "5K",
+      value: "5000",
+    },
+    {
+      name: "10K",
+      value: "10000",
+    },
+    {
+      name: "25K",
+      value: "25000",
+    },
+    {
+      name: "50K",
+      value: "50000",
+    },
+    {
+      name: "100K",
+      value: "100000",
+    },
+    {
+      name: "200K",
+      value: "200000",
+    },
+  ];
   const payoutsApprovedData = [
     {
       step: "1 Step (Alpha One)",
@@ -216,6 +259,16 @@ export default function DailyStats() {
 
   return (
     <Card className="flex flex-col gap-5 p-5 h-full">
+      <CardHeader className="flex flex-col p-0">
+        <div className="flex flex-col  items-start gap-2 justify-between xl:flex-row xl:items-center ">
+          <h3 className="font-extrabold text-xl">Daily Stats</h3>{" "}
+          <div className="flex flex-row flex-wrap items-center gap-2.5 xl:flex-nowrap">
+            <PlanTypeFiler data={planTypeData} />
+            <AccountSizeFilter data={accountSizeData} />
+            <DateRangeFilter />
+          </div>
+        </div>
+      </CardHeader>
       <div className="flex flex-row flex-wrap items-center justify-between gap-5 xl:flex-nowrap">
         <ReusableBarChart
           data={payoutsApprovedData}
