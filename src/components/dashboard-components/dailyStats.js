@@ -279,35 +279,35 @@ export default function DailyStats() {
         />
         <ReusableBarChart
           data={payoutsApprovedData}
-          title="Total Payouts Approved"
+          title="Payout Request"
           description="By Product and Payout Amount"
           config={payoutsApprovedConfig}
-          footerText="Showing total payouts approved for each product step"
+          footerText="Showing total Payout Request for each product step"
         />
       </div>
       <div className="flex flex-row flex-wrap items-center justify-between gap-5 xl:flex-nowrap">
         <ReusableBarChart
           data={payoutsApprovedData}
-          title="Total Payouts Approved"
+          title="New customers"
           description="By Product and Payout Amount"
           config={payoutsApprovedConfig}
-          footerText="Showing total payouts approved for each product step"
+          footerText="Showing New customers for each product step"
         />
         <ReusableBarChart
           data={payoutsApprovedData}
-          title="Total Payouts Approved"
+          title="Total Breached"
           description="By Product and Payout Amount"
           config={payoutsApprovedConfig}
-          footerText="Showing total payouts approved for each product step"
+          footerText="Showing Total Breached for each product step"
         />
       </div>
       <div className="h-fit w-full flex">
         <ReusableBarChart
           data={payoutsApprovedData}
-          title="Total Payouts Approved"
+          title="Total Passed"
           description="By Product and Payout Amount"
           config={payoutsApprovedConfig}
-          footerText="Showing total payouts approved for each product step"
+          footerText="Showing Total Passed for each product step"
         />
       </div>
       <div className="h-fit w-full flex">
