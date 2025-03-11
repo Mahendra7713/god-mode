@@ -156,12 +156,13 @@ export default function PassRates({ data }) {
               ]}
             />
             <ReusableSunburstChart
-              title="Stage 1 Pass"
+              title="Stage 2 Pass"
               description="Performance breakdown"
               lightMode={true}
               labels={["100K", "150K", "200K", "250K", "300K", "350K"]}
               data={[
                 {
+                  label: "1 Step (Alpha One)",
                   values: [10, 15, 25, 30, 20, 10], // First ring
                   colors: [
                     "#FFCD56",
@@ -173,6 +174,7 @@ export default function PassRates({ data }) {
                   ],
                 },
                 {
+                  label: "2 Step (Alpha Pro)",
                   values: [15, 10, 35, 25, 10, 5], // Second ring
                   colors: [
                     "#FF6384",
@@ -184,6 +186,7 @@ export default function PassRates({ data }) {
                   ],
                 },
                 {
+                  label: "2 Step (Alpha Swing)",
                   values: [20, 30, 10, 40, 15, 5], // Third ring
                   colors: [
                     "#36A2EB",
@@ -195,6 +198,7 @@ export default function PassRates({ data }) {
                   ],
                 },
                 {
+                  label: "3 Step (Alpha Three)",
                   values: [25, 15, 30, 35, 10, 20], // Fourth ring
                   colors: [
                     "#9966FF",
@@ -210,12 +214,13 @@ export default function PassRates({ data }) {
           </div>
           <div className="w-full flex-col flex  gap-2.5 flex-row lg:flex-row">
             <ReusableSunburstChart
-              title="Stage 1 Pass"
+              title="Qualified"
               description="Performance breakdown"
               lightMode={true}
               labels={["100K", "150K", "200K", "250K", "300K", "350K"]}
               data={[
                 {
+                  label: "1 Step (Alpha One)",
                   values: [10, 15, 25, 30, 20, 10], // First ring
                   colors: [
                     "#FFCD56",
@@ -227,6 +232,7 @@ export default function PassRates({ data }) {
                   ],
                 },
                 {
+                  label: "2 Step (Alpha Pro)",
                   values: [15, 10, 35, 25, 10, 5], // Second ring
                   colors: [
                     "#FF6384",
@@ -238,6 +244,7 @@ export default function PassRates({ data }) {
                   ],
                 },
                 {
+                  label: "2 Step (Alpha Swing)",
                   values: [20, 30, 10, 40, 15, 5], // Third ring
                   colors: [
                     "#36A2EB",
@@ -249,6 +256,7 @@ export default function PassRates({ data }) {
                   ],
                 },
                 {
+                  label: "3 Step (Alpha Three)",
                   values: [25, 15, 30, 35, 10, 20], // Fourth ring
                   colors: [
                     "#9966FF",
@@ -262,12 +270,13 @@ export default function PassRates({ data }) {
               ]}
             />
             <ReusableSunburstChart
-              title="Stage 1 Pass"
+              title="Funded"
               description="Performance breakdown"
               lightMode={true}
               labels={["100K", "150K", "200K", "250K", "300K", "350K"]}
               data={[
                 {
+                  label: "1 Step (Alpha One)",
                   values: [10, 15, 25, 30, 20, 10], // First ring
                   colors: [
                     "#FFCD56",
@@ -279,6 +288,7 @@ export default function PassRates({ data }) {
                   ],
                 },
                 {
+                  label: "2 Step (Alpha Pro)",
                   values: [15, 10, 35, 25, 10, 5], // Second ring
                   colors: [
                     "#FF6384",
@@ -290,6 +300,7 @@ export default function PassRates({ data }) {
                   ],
                 },
                 {
+                  label: "2 Step (Alpha Swing)",
                   values: [20, 30, 10, 40, 15, 5], // Third ring
                   colors: [
                     "#36A2EB",
@@ -301,6 +312,7 @@ export default function PassRates({ data }) {
                   ],
                 },
                 {
+                  label: "3 Step (Alpha Three)",
                   values: [25, 15, 30, 35, 10, 20], // Fourth ring
                   colors: [
                     "#9966FF",
