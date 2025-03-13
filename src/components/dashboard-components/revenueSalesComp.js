@@ -130,7 +130,7 @@ export default function RevenueSales() {
     xAxis: "month", // X-axis key
     series: [
       { label: "Custom", color: "#FFA500", dataKey: "custom" }, // Match custom data key
-      { label: "Previous", color: "#FFFF99", dataKey: "previous" }, // Match previous data key
+      { label: "Previous", color: "#d7b26d", dataKey: "previous" }, // Match previous data key
     ],
     domain: [0, 300000], // Adjust Y-axis domain for your data
     ticks: [0, 50000, 100000, 150000, 200000, 250000, 300000], // Adjust Y-axis ticks for your data
