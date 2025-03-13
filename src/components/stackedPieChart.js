@@ -105,6 +105,96 @@ export default function ReusableEChartsSunburstChart({
       })
       .filter(Boolean); // Remove null entries
 
+    // Define the base graphic configuration (to revert to on mouseout)
+    const baseGraphic = chartData.map((ring, ringIndex) => {
+      const ringRadius = ringRadii[ringIndex].outerRadius;
+
+      // Define positions, line length, and text offsets per step
+      const stepConfigs = [
+        {
+          angle: Math.PI / 2, // Right (Step 1 (Alpha One))
+          left: "70%",
+          top: "70%",
+          lineX: 35,
+          lineY: 0,
+          textLeft: 40,
+          textTop: -15,
+        },
+        {
+          angle: Math.PI / 2, // Left (Step 2 (Alpha Pro))
+          left: "8%",
+          top: `30%`,
+          lineX: 82,
+          lineY: 0,
+          textLeft: -65,
+          textTop: -12,
+        },
+        {
+          angle: Math.PI / 2, // Bottom (Step 2 (Alpha Swing))
+          left: "57%",
+          top: `30%`,
+          lineX: -110,
+          lineY: 0,
+          textLeft: 10,
+          textTop: -15,
+        },
+        {
+          angle: Math.PI / 2, // Left (Step 4)
+          left: "5%",
+          top: `55%`,
+          lineX: 160, // Longer line
+          lineY: 0,
+          textLeft: -65,
+          textTop: -12,
+        },
+      ];
+
+      const { angle, left, top, lineX, lineY, textLeft, textTop } =
+        stepConfigs[ringIndex] || stepConfigs[0];
+
+      return {
+        type: "group",
+        id: `graphic-group-${ringIndex}`, // Add an ID to identify the group
+        left: left,
+        top: top,
+        zlevel: 10000, // Bring in front of pie chart
+        children: [
+          {
+            type: "line",
+            id: `graphic-line-${ringIndex}`, // Add an ID to identify the line
+            zlevel: 10000,
+            shape: {
+              x1: 0,
+              y1: 0,
+              x2: lineX, // Customizable line length
+              y2: lineY,
+            },
+            style: {
+              stroke: "#000",
+              lineWidth: 1.5,
+            },
+          },
+          {
+            type: "text",
+            id: `graphic-text-${ringIndex}`, // Add an ID to identify the text
+            zlevel: 10000,
+            left: textLeft,
+            top: textTop,
+            style: {
+              text:
+                ring.label?.replace(/\(/g, "\n(") || `Step ${ringIndex + 1}`,
+              fontSize: 14,
+              fontWeight: "bold",
+              fill: "#000",
+              width: 150, // Set width to prevent overflow
+              lineHeight: 16, // Improve readability
+              textAlign: "left",
+            },
+          },
+        ],
+      };
+    });
+
     // ECharts options in light mode with label lines and ring labels
     const options = {
       backgroundColor: "#fff", // Light background for the chart area, matching light mode
@@ -123,93 +213,7 @@ export default function ReusableEChartsSunburstChart({
         borderWidth: 1,
       },
       series: seriesData, // Ensure all series (rings) are included
-      // Add ring labels (e.g., "1 Step", "2 Step", etc.) outside each ring with higher zIndex
-      graphic: chartData.map((ring, ringIndex) => {
-        const ringRadius = ringRadii[ringIndex].outerRadius;
-
-        // Define positions, line length, and text offsets per step
-        const stepConfigs = [
-          {
-            angle: Math.PI / 2, // Right (Step 1 (Alpha One))
-            left: "70%",
-            top: "70%",
-            lineX: 35,
-            lineY: 0,
-            textLeft: 40,
-            textTop: -15,
-          },
-          {
-            angle: Math.PI / 2, // Left (Step 2 (Alpha Pro))
-            left: "8%",
-            top: `30%`,
-            lineX: 82,
-            lineY: 0,
-            textLeft: -65,
-            textTop: -12,
-          },
-          {
-            angle: Math.PI / 2, // Bottom (Step 2 (Alpha Swing))
-            left: "57%",
-            top: `30%`,
-            lineX: -110,
-            lineY: 0,
-            textLeft: 10,
-            textTop: -15,
-          },
-          {
-            angle: Math.PI / 2, // Left (Step 4)
-            left: "5%",
-            top: `55%`,
-            lineX: 160, // Longer line
-            lineY: 0,
-            textLeft: -65,
-            textTop: -12,
-          },
-        ];
-
-        const { angle, left, top, lineX, lineY, textLeft, textTop } =
-          stepConfigs[ringIndex] || stepConfigs[0];
-
-        return {
-          type: "group",
-          left: left,
-          top: top,
-          zlevel: 10000, // Bring in front of pie chart
-          children: [
-            {
-              type: "line",
-              zlevel: 10000,
-              shape: {
-                x1: 0,
-                y1: 0,
-                x2: lineX, // Customizable line length
-                y2: lineY,
-              },
-              style: {
-                stroke: "#000",
-                lineWidth: 1.5,
-              },
-            },
-            {
-              type: "text",
-              zlevel: 10000,
-              left: textLeft,
-              top: textTop,
-              style: {
-                text:
-                  ring.label?.replace(/\(/g, "\n(") || `Step ${ringIndex + 1}`,
-                fontSize: 14,
-                fontWeight: "bold",
-                fill: "#000",
-                width: 150, // Set width to prevent overflow
-                lineHeight: 16, // Improve readability
-                textAlign: "left",
-              },
-            },
-          ],
-        };
-      }),
-
+      graphic: baseGraphic, // Set initial graphic configuration
       // Add legend at the bottom (optional, based on your data or image)
       legend: {
         data: chartLabels, // Use segment labels for legend
@@ -224,8 +228,67 @@ export default function ReusableEChartsSunburstChart({
       },
     };
 
-    // Set options and handle resize
+    // Set options
     echartInstance.setOption(options);
+
+    // Highlight graphic label and line on pie slice hover
+    echartInstance.on("mouseover", (params) => {
+      if (params.componentType === "series" && params.seriesType === "pie") {
+        const ringIndex = params.seriesIndex; // Index of the ring being hovered
+        const reversedIndex = totalRings - 1 - ringIndex; // Reverse the index
+        console.log(
+          "Hovered on ring:",
+          ringIndex,
+          "reversed to:",
+          reversedIndex,
+          "name:",
+          params.name
+        ); // Debug log
+
+        // Create a new graphic configuration with the highlighted styles for the reversed ring
+        const updatedGraphic = baseGraphic.map((graphic, index) => {
+          if (index === reversedIndex) {
+            // Highlight the opposite ring
+            return {
+              ...graphic,
+              children: [
+                {
+                  ...graphic.children[0], // Line
+                  style: {
+                    stroke: "#FF6F61", // Highlight color (red)
+                    lineWidth: 2.5, // Thicker line
+                  },
+                },
+                {
+                  ...graphic.children[1], // Text
+                  style: {
+                    ...graphic.children[1].style,
+                    fill: "#FF6F61", // Highlight color (red)
+                    fontSize: 16, // Slightly larger font
+                    fontWeight: "bolder", // Bolder text
+                  },
+                },
+              ],
+            };
+          }
+          return graphic; // Return unchanged for other rings
+        });
+
+        // Update the graphic elements
+        echartInstance.setOption({ graphic: updatedGraphic }, false);
+      }
+    });
+
+    // Revert graphic label and line on mouseout
+    echartInstance.on("mouseout", (params) => {
+      if (params.componentType === "series" && params.seriesType === "pie") {
+        const ringIndex = params.seriesIndex;
+        console.log("Mouseout from ring:", ringIndex, "name:", params.name); // Debug log
+
+        // Revert to the base graphic configuration
+        echartInstance.setOption({ graphic: baseGraphic }, false);
+      }
+    });
 
     // Handle resize
     const handleResize = () => {
@@ -237,6 +300,8 @@ export default function ReusableEChartsSunburstChart({
     // Clean up on unmount
     return () => {
       if (chartInstance) {
+        chartInstance.off("mouseover"); // Clean up event listeners
+        chartInstance.off("mouseout");
         chartInstance.dispose();
         setChartInstance(null);
       }
