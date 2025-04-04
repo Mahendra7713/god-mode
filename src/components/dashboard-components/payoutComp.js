@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AccountSizeFilter from "../accountFilter";
 import PlanTypeFiler from "../planFilter";
 import DateRangeFilter from "../rangeFilter";
@@ -13,90 +13,144 @@ import icon2 from "../icons/totalAmountPaid.svg";
 import icon3 from "../icons/totalAmountReq.svg";
 import icon4 from "../icons/noOfPayout.svg";
 import OpenProfitData from "./openProfit";
-export default function Payout() {
+import { apiFunc } from "@/lib/api";
+import { format, subDays, subMonths } from "date-fns";
+export default function Payout({ planOptions, planAndDetails }) {
+  const [dates, setDates] = useState({
+    from: subMonths(new Date(), 1),
+    to: subDays(new Date(), 1),
+  });
+  const [accountSize, setAccountSize] = useState(null);
+  const [plantype, setPlantype] = useState(null);
+  const [openProfitTable, setOpenProfitTable] = useState(null);
+
   const [selectedCountry, setSelectedCountry] = useState(null);
-  const planTypeData = [
-    {
-      name: "Stage 1",
-      value: "stage_1",
-    },
-    {
-      name: "Stage 2",
-      value: "stage_2",
-    },
-    {
-      name: "Funded",
-      value: "funded",
-    },
-  ];
-  const accountSizeData = [
-    {
-      name: "5K",
-      value: "5000",
-    },
-    {
-      name: "10K",
-      value: "10000",
-    },
-    {
-      name: "25K",
-      value: "25000",
-    },
-    {
-      name: "50K",
-      value: "50000",
-    },
-    {
-      name: "100K",
-      value: "100000",
-    },
-    {
-      name: "200K",
-      value: "200000",
-    },
-  ];
+  const [payoutStats, setPayoutStats] = useState(null);
+
+  function getQuery() {
+    let query;
+    if (dates) {
+      let formatDate = "yyyy-MM-dd";
+      query = `?start_date=${format(dates?.from, formatDate)}&end_date=${format(
+        dates?.to,
+        formatDate
+      )}`;
+    }
+    if (plantype) {
+      query += `&plan_type=${plantype}`;
+    }
+    if (accountSize) {
+      query += `&account_size=${accountSize}`;
+    }
+    return query;
+  }
+
+  useEffect(() => {
+    // if (planAndDetails) {
+      console.log("I am here");
+      let method = "GET";
+      let query = getQuery();
+      let url = `total/payment-request/${query}`;
+      let successFunc = (data) => {
+        // console.log("successFunc data : ", data);
+        setPayoutStats(data);
+      };
+      let errorFunc = (error) => {
+        console.log("errorFunc data : ", error);
+      };
+      apiFunc(url, method, null, successFunc, errorFunc);
+    // }
+  }, [dates, plantype, accountSize, planAndDetails]);
+
+  useEffect(() => {
+    if (planAndDetails) {
+      console.log("I am here");
+      let method = "GET";
+      let query = getQuery();
+      let url = `get/payouts/plan-wise/`;
+      let successFunc = (data) => {
+        console.log("successFunc data : ", data);
+      };
+      let errorFunc = (error) => {
+        console.log("errorFunc data : ", error);
+      };
+      apiFunc(url, method, null, successFunc, errorFunc);
+    }
+  }, [dates, plantype, accountSize, planAndDetails]);
 
   const payoutsColumns = [
     {
-      key: "Product / Variation Title",
-      name: "Product / Variation Title",
+      key: "plan_type",
+      name: "Plan Type",
       align: "left",
       width: "w-[200px]",
     },
-    { key: "SKU", name: "SKU", align: "left", width: "w-[100px]" },
     {
-      key: "Items Sold",
-      name: "Items Sold",
+      key: "payout_count",
+      name: "Payout Count",
       align: "right",
       width: "w-[120px]",
     },
-    { key: "Net Sales", name: "Net Sales", align: "right", width: "w-[150px]" },
-    { key: "Orders", name: "Orders", align: "right", width: "w-[120px]" },
-    { key: "Status", name: "Status", align: "left", width: "w-[120px]" },
+    {
+      key: "payout_amount",
+      name: "Payout Amount",
+      align: "right",
+      width: "w-[150px]",
+    },
+    {
+      key: "payment_count",
+      name: "Payment Count",
+      align: "right",
+      width: "w-[120px]",
+    },
+    {
+      key: "payment_amount",
+      name: "Payment Amount",
+      align: "right",
+      width: "w-[150px]",
+    },
   ];
+
+  console.log("payoutStats", payoutStats);
+  const payoutTotal = payoutStats?.result?.reduce(
+    (acc, curr) => {
+      acc.amount_of_payout_requested += curr.amount_of_payout_requested || 0;
+      acc.amount_of_payout_approved += curr.amount_of_payout_approved || 0;
+      acc.number_of_payouts_requested += curr.number_of_payouts_requested || 0;
+      acc.number_of_payouts_approved += curr.number_of_payouts_approved || 0;
+      return acc;
+    },
+    {
+      amount_of_payout_requested: 0,
+      amount_of_payout_approved: 0,
+      number_of_payouts_requested: 0,
+      number_of_payouts_approved: 0,
+    }
+  );
 
   const payoutStatsData = [
     {
       title: "Total Amount Requested",
-      value: "$428,752",
+      value: `$${payoutTotal?.amount_of_payout_requested?.toFixed(2)}` ?? "-",
       image: icon3,
     },
     {
       title: "Total Amount Paid",
-      value: "$124,512",
+      value: `$${payoutTotal?.amount_of_payout_approved?.toFixed(2)}` ?? "-",
       image: icon2,
     },
     {
       title: "No. Of Payout Requests",
-      value: "1547",
+      value: payoutTotal?.number_of_payouts_requested ?? "-",
       image: icon4,
     },
     {
       title: "No. Of Approved Request",
-      value: "1025",
+      value: payoutTotal?.number_of_payouts_approved ?? "-",
       image: icon1,
     },
   ];
+
   const handleCountrySelect = (countryName) => {
     console.log("Selected country in parent:", countryName);
     setSelectedCountry(countryName); // Update state with the selected country name
@@ -243,15 +297,44 @@ export default function Payout() {
     },
   };
 
+  useEffect(() => {
+    let url = `get/payouts/plan-wise/`;
+    let method = "GET";
+    let body = {};
+    let successFunc = (data) => {
+      console.log("successFunc data : ", data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, body, successFunc, errorFunc);
+  }, []);
+
+  useEffect(() => {
+    let query = getQuery();
+    let url = `revenue/open-profit/table/${query}`;
+    let method = "GET";
+    let body = {};
+    let successFunc = (data) => {
+      setOpenProfitTable(data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, body, successFunc, errorFunc);
+  }, []);
   return (
     <Card className="flex flex-col gap-5 p-5">
       <CardHeader className="flex flex-col p-0">
         <div className="flex flex-col  items-start gap-2 justify-between xl:flex-row xl:items-center ">
           <h3 className="font-extrabold text-xl">Payouts</h3>{" "}
           <div className="flex flex-row flex-wrap items-center gap-2.5 xl:flex-nowrap">
-            <PlanTypeFiler data={planTypeData} />
-            <AccountSizeFilter data={accountSizeData} />
-            <DateRangeFilter />
+            <PlanTypeFiler data={planOptions} setPlantype={setPlantype} />
+            <AccountSizeFilter
+              data={plantype ? planAndDetails?.[plantype] : []}
+              setAccountSize={setAccountSize}
+            />
+            <DateRangeFilter dates={dates} setDates={setDates} />
           </div>
         </div>
       </CardHeader>
@@ -299,7 +382,7 @@ export default function Payout() {
         />
       </div>
       <div>
-        <OpenProfitData />
+        <OpenProfitData openProfitTableData={openProfitTable} />
       </div>
     </Card>
   );

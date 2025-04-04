@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AccountSizeFilter from "../accountFilter";
 import icon1 from "../icons/newCustomers.svg";
 import icon2 from "../icons/returningCustomers.svg";
@@ -13,58 +13,30 @@ import StatsCard from "../statsCard";
 import { Card, CardHeader } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import WorldMap from "../WorldMap";
+import { apiFunc } from "@/lib/api";
+import { format, subDays, subMonths } from "date-fns";
 
-export default function RevenueSales() {
-  const planTypeData = [
-    {
-      name: "Stage 1",
-      value: "stage_1",
-    },
-    {
-      name: "Stage 2",
-      value: "stage_2",
-    },
-    {
-      name: "Funded",
-      value: "funded",
-    },
-  ];
-  const accountSizeData = [
-    {
-      name: "5K",
-      value: "5000",
-    },
-    {
-      name: "10K",
-      value: "10000",
-    },
-    {
-      name: "25K",
-      value: "25000",
-    },
-    {
-      name: "50K",
-      value: "50000",
-    },
-    {
-      name: "100K",
-      value: "100000",
-    },
-    {
-      name: "200K",
-      value: "200000",
-    },
-  ];
+export default function RevenueSales({ planOptions, planAndDetails }) {
+  const [dates, setDates] = useState({
+    from: subMonths(new Date(), 1),
+    to: subDays(new Date(), 1),
+  });
+  const [accountSize, setAccountSize] = useState(null);
+  const [plantype, setPlantype] = useState(null);
+  const [accountStatus, setAccountStatus] = useState("active");
+
   const [selectedCountry, setSelectedCountry] = useState(null);
-  const [chartType, setChartType] = useState("Sales"); // State to manage chart type
+  const [chartType, setChartType] = useState("Sales");
+  const [revenueCardsData, setRevenueCardsData] = useState([]);
+  const [countryWiseData, setCountryWiseData] = useState([]);
 
   const handleCountrySelect = (countryName) => {
     console.log("Selected country in parent:", countryName);
-    setSelectedCountry(countryName); // Update state with the selected country name
+    setSelectedCountry(countryName);
   };
 
   const handleChartToggle = (newType) => {
-    setChartType(newType); // Update chart type in parent
+    setChartType(newType);
   };
 
   const columns = [
@@ -107,22 +79,30 @@ export default function RevenueSales() {
   const statsData = [
     {
       title: "Total Sales",
-      value: "$428,752",
+      value: revenueCardsData
+        ?.map((item) => item?.total_sales)
+        ?.reduce((acc, itr) => acc + itr, 0),
       image: icon4,
     },
     {
       title: "Total Orders",
-      value: "1547",
+      value: revenueCardsData
+        ?.map((item) => item?.total_orders)
+        ?.reduce((acc, itr) => acc + itr, 0),
       image: icon3,
     },
     {
       title: "New Customers",
-      value: "2874",
+      value: revenueCardsData
+        ?.map((item) => item?.new_customers)
+        ?.reduce((acc, itr) => acc + itr, 0),
       image: icon1,
     },
     {
       title: "Returning Customers",
-      value: "52%",
+      value: revenueCardsData
+        ?.map((item) => item?.returning_rate)
+        ?.reduce((acc, itr) => acc + itr, 0),
       image: icon2,
     },
   ];
@@ -137,6 +117,78 @@ export default function RevenueSales() {
     tickFormatter: (value) => `$${value / 1000}K`, // Format Y-axis ticks
   };
 
+  function getQuery() {
+    let query;
+    if (dates) {
+      let formatDate = 'dd/MMM/yyyy';
+      query = `?start_date=${format(dates?.from, formatDate)}&end_date=${format(dates?.to, formatDate)}`
+    }
+    if (plantype) {
+      query += `&plan_type=${plantype}`
+    }
+    if (accountSize) {
+      query += `&account_size=${accountSize}`
+    }
+    return query;
+  }
+
+  useEffect(() => {
+    let method = "GET";
+    let query = getQuery();
+    console.log("query : ",query)
+    let url = `revenue/cards/${query}`;
+    let successFunc = (data) => {
+      console.log("successFunc data : ", data);
+      setRevenueCardsData(data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, null, successFunc, errorFunc);
+  }, [accountStatus, plantype, accountSize, dates]);
+
+  useEffect(() => {
+    let method = "GET";
+    let query = getQuery();
+    let url = `revenue/order/prodcut/${query}`;
+    let successFunc = (data) => {
+      console.log("successFunc data : ", data);
+      setOrderProducts(data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, null, successFunc, errorFunc);
+  }, [accountStatus, plantype, accountSize, dates]);
+
+  useEffect(() => {
+    let method = "GET";
+    let query = getQuery();
+    let url = `revenue/order/plans/${query}`;
+    let successFunc = (data) => {
+      console.log("successFunc data : ", data);
+      setOrderProducts(data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, null, successFunc, errorFunc);
+  }, [accountStatus, plantype, accountSize, dates]);
+
+  useEffect(() => {
+    let method = "GET";
+    let query = getQuery();
+    let url = `v3/country-wise-overview/`;
+    let successFunc = (data) => {
+      console.log("successFunc data : ", data);
+      setCountryWiseData(data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, null, successFunc, errorFunc);
+  }, [dates]);
+
   return (
     <Card className="p-5 flex flex-col gap-5">
       {" "}
@@ -145,9 +197,9 @@ export default function RevenueSales() {
         <div className="flex flex-col  items-start gap-2 justify-between xl:flex-row xl:items-center ">
           <h3 className="font-extrabold text-xl">Revenue Sales</h3>{" "}
           <div className="flex flex-row flex-wrap items-center gap-2.5 xl:flex-nowrap">
-            <PlanTypeFiler data={planTypeData} />
-            <AccountSizeFilter data={accountSizeData} />
-            <DateRangeFilter />
+            <PlanTypeFiler data={planOptions} setPlantype={setPlantype} />
+            <AccountSizeFilter data={plantype ? planAndDetails?.[plantype] : []} setAccountSize={setAccountSize} />
+            <DateRangeFilter dates={dates} setDates={setDates} />
           </div>
         </div>
       </CardHeader>

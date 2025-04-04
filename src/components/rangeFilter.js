@@ -11,11 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export default function DatePickerWithRange() {
-  const [date, setDate] = useState({
-    from: undefined,
-    to: undefined,
-  });
+export default function DatePickerWithRange({dates, setDates}) {
 
   return (
     <div className="grid gap-2">
@@ -27,11 +23,11 @@ export default function DatePickerWithRange() {
           >
             <div className="flex items-center w-full justify-between">
               <span>
-                {date?.from ? format(date.from, "LLL dd, y") : "Start Date"}
+                {dates?.from ? format(dates.from, "LLL dd, y") : "Start Date"}
               </span>
               <span className="mx-2">→</span>
               <span>
-                {date?.to ? format(date.to, "LLL dd, y") : "End Date"}
+                {dates?.to ? format(dates.to, "LLL dd, y") : "End Date"}
               </span>
               <CalendarIcon className="ml-2 h-4 w-4" />
             </div>
@@ -41,10 +37,11 @@ export default function DatePickerWithRange() {
           <Calendar
             initialFocus
             mode="range"
-            defaultMonth={date?.from || new Date()}
-            selected={date}
+            defaultMonth={dates?.from || new Date()}
+            selected={dates}
             onSelect={(newDate) => {
-              setDate({
+              console.log("newDate : ",newDate)
+              setDates({
                 from: newDate?.from || undefined,
                 to: newDate?.to || undefined,
               });

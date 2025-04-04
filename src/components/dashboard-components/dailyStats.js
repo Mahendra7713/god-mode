@@ -1,102 +1,108 @@
 "use client";
 
+import { apiFunc } from "@/lib/api";
 import AccountSizeFilter from "../accountFilter";
 import PlanTypeFiler from "../planFilter";
 import DateRangeFilter from "../rangeFilter";
 import ReusableBarChart from "../reusableBarChart";
 import ReusableTable from "../reusableTable";
 import { Card, CardHeader } from "../ui/card";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
 
-export default function DailyStats() {
-  const planTypeData = [
-    {
-      name: "Stage 1",
-      value: "stage_1",
-    },
-    {
-      name: "Stage 2",
-      value: "stage_2",
-    },
-    {
-      name: "Funded",
-      value: "funded",
-    },
-  ];
-  const accountSizeData = [
-    {
-      name: "5K",
-      value: "5000",
-    },
-    {
-      name: "10K",
-      value: "10000",
-    },
-    {
-      name: "25K",
-      value: "25000",
-    },
-    {
-      name: "50K",
-      value: "50000",
-    },
-    {
-      name: "100K",
-      value: "100000",
-    },
-    {
-      name: "200K",
-      value: "200000",
-    },
-  ];
-  const payoutsApprovedData = [
-    {
-      step: "1 Step (Alpha One)",
-      "10K": 100,
-      "30K": 75,
-      "40K": 50,
-      "50K": 125,
-      "60K": 90,
-      "70K": 200,
-    },
-    {
-      step: "2 Step (Alpha Pro)",
-      "10K": 150,
-      "30K": 110,
-      "40K": 90,
-      "50K": 210,
-      "60K": 180,
-      "70K": 50,
-    },
-    {
-      step: "2 Step (Swing)",
-      "10K": 200,
-      "30K": 250,
-      "40K": 260,
-      "50K": 220,
-      "60K": 190,
-      "70K": 130,
-    },
-    {
-      step: "3 Step (Alpha Three)",
-      "10K": 130,
-      "30K": 120,
-      "40K": 40,
-      "50K": 240,
-      "60K": 210,
-      "70K": 150,
-    },
-  ];
+export default function DailyStats({ isLoading, planOptions, planAndDetails }) {
+  const [dates, setDates] = useState({ from: new Date(), to: new Date() });
+  const [accountSize, setAccountSize] = useState(null);
+  const [plantype, setPlantype] = useState(null);
+  const [dailyStatsDetails, setDailyStatsDetails] = useState([]);
 
-  // Configuration for Total Payouts Approved chart
+  function getQuery() {
+    let query;
+    if (dates) {
+      let formatDate = "dd/MMM/yyyy";
+      query = `?start_date=${format(dates?.from, formatDate)}&end_date=${format(
+        dates?.to,
+        formatDate
+      )}`;
+    }
+    if (plantype) {
+      query += `&plan_type=${plantype}`;
+    }
+    if (accountSize) {
+      query += `&account_size=${accountSize}`;
+    }
+    return query;
+  }
+
+  useEffect(() => {
+    // if (planAndDetails) {
+    let query = getQuery();
+    let method = "GET";
+    let body = {};
+    let url = `daily-stats/${query}`;
+    let successFunc = (data) => {
+      setDailyStatsDetails(data?.data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, body, successFunc, errorFunc, null);
+    // }
+  }, [dates, plantype, accountSize, planAndDetails]);
+
+  const groupedDailyStats = {};
+
+  dailyStatsDetails?.forEach((item) => {
+    const plan = item?.plan_type;
+
+    console.log(plan, "plan");
+
+    if (!groupedDailyStats[plan]) {
+      groupedDailyStats[plan] = {
+        plan,
+        approved: 0,
+        requested: 0,
+      };
+    }
+    groupedDailyStats[plan].approved += item?.total_approved_payout_count || 0;
+    groupedDailyStats[plan].requested +=
+      item?.total_requested_payout_count || 0;
+  });
+
+  const payoutsApprovedData = Object.values(groupedDailyStats);
+
+  console.log("groupedDailyStats", groupedDailyStats);
+  // console.log("payoutsApprovedData", payoutsApprovedData);
+
+  // const payoutsApprovedData = [
+  //   {
+  //     plan: "1 Step (Alpha One)",
+  //     approved: 5,
+  //   },
+  //   {
+  //     plan: "2 Step (Alpha Pro)",
+  //     approved: 10,
+  //   },
+  //   {
+  //     step: "2 Step (Swing)",
+  //     approved: 0,
+  //   },
+  //   {
+  //     step: "3 Step (Alpha Three)",
+  //     approved: 3,
+  //   },
+  // ];
+
   const payoutsApprovedConfig = {
-    xAxis: "step", // X-axis key for step labels
+    xAxis: "plan",
+    // yAxis: "approved",
     series: [
-      { label: "10K", color: "#FFD700", dataKey: "10K" }, // Yellow
-      { label: "30K", color: "#FFA500", dataKey: "30K" }, // Orange
-      { label: "40K", color: "#FF4500", dataKey: "40K" }, // Red
-      { label: "50K", color: "#9370DB", dataKey: "50K" }, // Purple
-      { label: "60K", color: "#4682B4", dataKey: "60K" }, // Blue
-      { label: "70K", color: "#90EE90", dataKey: "70K" }, // Green
+      { label: "Approved", color: "#FFD700", dataKey: "approved" }, // Yellow
+      { label: "Requested", color: "#FFA500", dataKey: "requested" }, // Orange
+      // { label: "40K", color: "#FF4500", dataKey: "40K" }, // Red
+      // { label: "50K", color: "#9370DB", dataKey: "50K" }, // Purple
+      // { label: "60K", color: "#4682B4", dataKey: "60K" }, // Blue
+      // { label: "70K", color: "#90EE90", dataKey: "70K" }, // Green
     ],
     domain: [0, 300], // Y-axis domain matching the image
     ticks: [0, 50, 100, 150, 200, 250, 300], // Y-axis ticks matching the image
@@ -256,16 +262,18 @@ export default function DailyStats() {
       totalPassed: 12,
     },
   ];
-
   return (
     <Card className="flex flex-col gap-5 p-5 h-full">
       <CardHeader className="flex flex-col p-0">
         <div className="flex flex-col  items-start gap-2 justify-between xl:flex-row xl:items-center ">
           <h3 className="font-extrabold text-xl">Daily Stats</h3>{" "}
           <div className="flex flex-row flex-wrap items-center gap-2.5 xl:flex-nowrap">
-            <PlanTypeFiler data={planTypeData} />
-            <AccountSizeFilter data={accountSizeData} />
-            <DateRangeFilter />
+            <PlanTypeFiler data={planOptions} setPlantype={setPlantype} />
+            <AccountSizeFilter
+              data={plantype ? planAndDetails?.[plantype] : []}
+              setAccountSize={setAccountSize}
+            />
+            <DateRangeFilter dates={dates} setDates={setDates} />
           </div>
         </div>
       </CardHeader>
@@ -274,14 +282,31 @@ export default function DailyStats() {
           data={payoutsApprovedData}
           title="Total Payouts Approved"
           description="By Product and Payout Amount"
-          config={payoutsApprovedConfig}
+          config={{
+            xAxis: "plan",
+            series: [
+              { label: "Approved", color: "#FFD700", dataKey: "approved" },
+            ],
+            domain: [0, 300],
+            ticks: [0, 50, 100, 150, 200, 250, 300],
+            tickFormatter: (value) => value,
+          }}
           footerText="Showing total payouts approved for each product step"
         />
+
         <ReusableBarChart
           data={payoutsApprovedData}
           title="Payout Request"
           description="By Product and Payout Amount"
-          config={payoutsApprovedConfig}
+          config={{
+            xAxis: "plan",
+            series: [
+              { label: "Requested", color: "#FF4500", dataKey: "requested" },
+            ],
+            domain: [0, 300],
+            ticks: [0, 50, 100, 150, 200, 250, 300],
+            tickFormatter: (value) => value,
+          }}
           footerText="Showing total Payout Request for each product step"
         />
       </div>

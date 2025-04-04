@@ -8,7 +8,10 @@ import {
   SelectValue,
 } from "./ui/select";
 
-export default function AccountSizeFilter({ data }) {
+export default function AccountSizeFilter({ data, setAccountSize }) {
+  function handleValueChange(value) {
+    setAccountSize(value);
+  }
   return (
     <div className="flex flex-row items-center gap-2.5">
       <Label
@@ -17,7 +20,7 @@ export default function AccountSizeFilter({ data }) {
       >
         Account Size
       </Label>
-      <Select>
+      <Select onValueChange={handleValueChange}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select a Account Size" />
         </SelectTrigger>

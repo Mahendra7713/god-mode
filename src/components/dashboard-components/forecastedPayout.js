@@ -1,167 +1,215 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import AccountSizeFilter from "../accountFilter";
 import PlanTypeFiler from "../planFilter"; // Note: Typo in "Filer" should be "Filter" if applicable
 import DateRangeFilter from "../rangeFilter";
 import ReusableD3BubbleChart from "../reusableBubbleChart";
-
+// import "./style.scss";
 import TextStatsCard from "../textStatCard";
 import { Card, CardHeader } from "../ui/card";
+import { apiFunc } from "@/lib/api";
+import { format, subDays, subMonths } from "date-fns";
+import { ForecastedPayoutChart } from "./forecastedPayoutChart";
 
-export default function ForecastedPayout() {
-  const forecastedPayoutData = [
-    { x: "Jan", y: 150, series: "25K" },
-    { x: "Jan", y: 200, series: "50K" },
-    { x: "Jan", y: 100, series: "100K" },
-    { x: "Jan", y: 300, series: "125K" },
-    { x: "Jan", y: 250, series: "150K" },
-    { x: "Jan", y: 400, series: "200K" },
-    { x: "Feb", y: 180, series: "25K" },
-    { x: "Feb", y: 220, series: "50K" },
-    { x: "Feb", y: 120, series: "100K" },
-    { x: "Feb", y: 350, series: "125K" },
-    { x: "Feb", y: 280, series: "150K" },
-    { x: "Feb", y: 450, series: "200K" },
-    { x: "Mar", y: 200, series: "25K" },
-    { x: "Mar", y: 250, series: "50K" },
-    { x: "Mar", y: 150, series: "100K" },
-    { x: "Mar", y: 380, series: "125K" },
-    { x: "Mar", y: 300, series: "150K" },
-    { x: "Mar", y: 480, series: "200K" },
-    { x: "Apr", y: 170, series: "25K" },
-    { x: "Apr", y: 230, series: "50K" },
-    { x: "Apr", y: 130, series: "100K" },
-    { x: "Apr", y: 360, series: "125K" },
-    { x: "Apr", y: 290, series: "150K" },
-    { x: "Apr", y: 470, series: "200K" },
-    { x: "May", y: 190, series: "25K" },
-    { x: "May", y: 240, series: "50K" },
-    { x: "May", y: 140, series: "100K" },
-    { x: "May", y: 370, series: "125K" },
-    { x: "May", y: 310, series: "150K" },
-    { x: "May", y: 490, series: "200K" },
-    { x: "Jun", y: 210, series: "25K" },
-    { x: "Jun", y: 260, series: "50K" },
-    { x: "Jun", y: 160, series: "100K" },
-    { x: "Jun", y: 390, series: "125K" },
-    { x: "Jun", y: 320, series: "150K" },
-    { x: "Jun", y: 500, series: "200K" },
-    { x: "Jul", y: 180, series: "25K" },
-    { x: "Jul", y: 220, series: "50K" },
-    { x: "Jul", y: 110, series: "100K" },
-    { x: "Jul", y: 340, series: "125K" },
-    { x: "Jul", y: 280, series: "150K" },
-    { x: "Jul", y: 450, series: "200K" },
-    { x: "Aug", y: 200, series: "25K" },
-    { x: "Aug", y: 250, series: "50K" },
-    { x: "Aug", y: 130, series: "100K" },
-    { x: "Aug", y: 360, series: "125K" },
-    { x: "Aug", y: 300, series: "150K" },
-    { x: "Aug", y: 470, series: "200K" },
-    { x: "Sep", y: 220, series: "25K" },
-    { x: "Sep", y: 270, series: "50K" },
-    { x: "Sep", y: 150, series: "100K" },
-    { x: "Sep", y: 380, series: "125K" },
-    { x: "Sep", y: 320, series: "150K" },
-    { x: "Sep", y: 490, series: "200K" },
-    { x: "Oct", y: 230, series: "25K" },
-    { x: "Oct", y: 280, series: "50K" },
-    { x: "Oct", y: 160, series: "100K" },
-    { x: "Oct", y: 390, series: "125K" },
-    { x: "Oct", y: 330, series: "150K" },
-    { x: "Oct", y: 500, series: "200K" },
-    { x: "Nov", y: 210, series: "25K" },
-    { x: "Nov", y: 260, series: "50K" },
-    { x: "Nov", y: 140, series: "100K" },
-    { x: "Nov", y: 370, series: "125K" },
-    { x: "Nov", y: 310, series: "150K" },
-    { x: "Nov", y: 480, series: "200K" },
-    { x: "Dec", y: 190, series: "25K" },
-    { x: "Dec", y: 240, series: "50K" },
-    { x: "Dec", y: 120, series: "100K" },
-    { x: "Dec", y: 350, series: "125K" },
-    { x: "Dec", y: 290, series: "150K" },
-    { x: "Dec", y: 460, series: "200K" },
-  ];
+export default function ForecastedPayout({ planOptions, planAndDetails }) {
+  const [dates, setDates] = useState({
+    from: subMonths(new Date(), 1),
+    to: subDays(new Date(), 1),
+  });
+  const [accountSize, setAccountSize] = useState(null);
+  const [plantype, setPlantype] = useState(null);
+  const [revenueCards, setRevenueCards] = useState([]);
+  const [actualPayouts, setActualPayouts] = useState([]);
+  const [forecastedStats, setForecastedStats] = useState([]);
+  const [forecastedChartData, setForecastedChartData] = useState({});
 
-  // Dummy data for the cards
+  const forecastedPayoutData = Object.entries(forecastedChartData).map(
+    ([date, value]) => ({
+      x: date,
+      y: value?.predicted || 0,
+      series: "50k",
+    })
+  );
+  const uniqueDates = Object.keys(forecastedChartData);
+  // console.log("uniqueDates", uniqueDates);
+  // console.log("forecastedPayoutData", forecastedPayoutData);
+  // console.log("forecastedChartData", forecastedChartData);
   const actualPayoutStats = {
-    "Total Accounts": 2000,
-    "Requested Payouts": "$254,324.00",
-    "Average Payout Value": "$2,000.00",
-    "Payout Frequency / Account": 5,
-    "Actual Payouts Disbursed": "$214,100.00",
+    "Total Accounts": actualPayouts?.data?.data?.funded_accounts
+      ? actualPayouts?.data?.funded_accounts
+      : "-",
+    "Requested Payouts": actualPayouts?.data?.requested_payouts
+      ? `$${actualPayouts?.data?.requested_payouts.toLocaleString()}`
+      : "-",
+    "Average Payout Value": actualPayouts?.data?.avg_payout_value
+      ? `$${actualPayouts?.data?.avg_payout_value.toFixed(2)}`
+      : "-",
+    "Payout Frequency / Account": actualPayouts?.data?.frequency
+      ? actualPayouts?.data?.frequency
+      : "-",
+    "Actual Payouts Disbursed": actualPayouts?.data?.actual_payout_disbursed
+      ? `$${actualPayouts?.data?.actual_payout_disbursed.toLocaleString()}`
+      : "-",
   };
 
   const forecastedPayoutStats = {
-    "Total Accounts": 2000,
-    "Requested Payouts": "$260,250.00",
-    "Average Payout Value": "$3,000.00",
-    "Payout Frequency / Account": "87%",
-    "Expected Liability": "$220,000.00",
+    "Total Accounts": forecastedStats?.total_accounts
+      ? Math.round(forecastedStats.total_accounts)
+      : "-",
+    "Requested Payouts": forecastedStats?.requested_payouts
+      ? `$${forecastedStats.requested_payouts.toLocaleString()}`
+      : "-",
+    "Average Payout Value": forecastedStats?.average_payout_value
+      ? `$${forecastedStats.average_payout_value.toFixed(2)}`
+      : "-",
+    "Payout Frequency / Account": forecastedStats?.payout_frequency
+      ? `${forecastedStats.payout_frequency.toFixed(2)}`
+      : "-",
+    "Expected Liability": forecastedStats?.expected_liability
+      ? `$${forecastedStats.expected_liability.toLocaleString()}`
+      : "-",
   };
 
   const revenueStats = {
-    Accounts: 2000,
-    "Generated Revenue": "$254,324.00",
-    "Average Order Value": "$2,000.00",
-    "Stage 1 Pass Rates": "87%",
-    "Stage 2 Pass Rates": "68%",
-    "Stage 3 Pass Rates": "55%",
-    "Total % Funded From Gross Number Purchased": "8%",
+    Accounts: revenueCards?.data?.accounts ? revenueCards.data.accounts : "-",
+    "Generated Revenue": revenueCards?.data?.generated_revenue
+      ? `$${revenueCards.data.generated_revenue.toLocaleString()}.00`
+      : "-",
+    "Average Order Value": revenueCards?.data?.average_order_value
+      ? `$${revenueCards.data.average_order_value.toFixed(2)}`
+      : "-",
+    "Stage 1 Pass Rates": revenueCards?.data?.accounts
+      ? `${(
+          (revenueCards.data.stage_1 / revenueCards.data.accounts) *
+          100
+        ).toFixed(2)}%`
+      : "-",
+    "Stage 2 Pass Rates": revenueCards?.data?.accounts
+      ? `${(
+          (revenueCards.data.stage_2 / revenueCards.data.accounts) *
+          100
+        ).toFixed(2)}%`
+      : "-",
+    "Stage 3 Pass Rates": revenueCards?.data?.accounts
+      ? `${(
+          (revenueCards.data.stage_3 / revenueCards.data.accounts) *
+          100
+        ).toFixed(2)}%`
+      : "-",
+    "Total % Funded From Gross Number Purchased": revenueCards?.data
+      ?.funded_from_gross
+      ? `${revenueCards.data.funded_from_gross.toFixed(2)}%`
+      : "-",
   };
 
-  const planTypeData = [
-    {
-      name: "Stage 1",
-      value: "stage_1",
-    },
-    {
-      name: "Stage 2",
-      value: "stage_2",
-    },
-    {
-      name: "Funded",
-      value: "funded",
-    },
-  ];
+  function getQuery() {
+    let query;
+    if (dates) {
+      let formatDate = "dd/MMM/yyyy";
+      query = `?start_date=${format(dates?.from, formatDate)}&end_date=${format(
+        dates?.to,
+        formatDate
+      )}`;
+    }
+    if (plantype) {
+      query += `&plan_type=${plantype}`;
+    }
+    if (accountSize) {
+      query += `&account_size=${accountSize}`;
+    }
+    return query;
+  }
+  useEffect(() => {
+    let baseURL = `https://payout-forecast.alphacapitalgroup.uk/`;
+    let query = getQuery();
+    let url = `revenue_cards/${query}`;
+    let method = "POST";
+    let formatDate = "yyyy-MM-dd";
+    let body = {
+      start_date: format(dates?.from, formatDate),
+      end_date: format(dates?.to, formatDate),
+    };
+    let successFunc = (data) => {
+      // console.log("successFunc data : ", data);
+      setRevenueCards(data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, body, successFunc, errorFunc, null, baseURL, true);
+  }, [dates]);
 
-  const accountSizeData = [
-    {
-      name: "5K",
-      value: "5000",
-    },
-    {
-      name: "10K",
-      value: "10000",
-    },
-    {
-      name: "25K",
-      value: "25000",
-    },
-    {
-      name: "50K",
-      value: "50000",
-    },
-    {
-      name: "100K",
-      value: "100000",
-    },
-    {
-      name: "200K",
-      value: "200000",
-    },
-  ];
+  useEffect(() => {
+    let baseURL = `https://payout-forecast.alphacapitalgroup.uk/`;
+    let query = getQuery();
+    let url = `actual_payouts_data/${query}`;
+    let method = "POST";
+    let formatDate = "yyyy-MM-dd";
+    let body = {
+      start_date: format(dates?.from, formatDate),
+      end_date: format(dates?.to, formatDate),
+    };
+    let successFunc = (data) => {
+      // console.log("successFunc data : ", data);
+      setActualPayouts(data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, body, successFunc, errorFunc, null, baseURL, true);
+  }, [dates]);
+
+  useEffect(() => {
+    let baseURL = `https://payout-forecast.alphacapitalgroup.uk/`;
+    let query = getQuery();
+    let url = `forecasted_data/${query}`;
+    let method = "POST";
+    let formatDate = "yyyy-MM-dd";
+    let body = {
+      start_date: format(dates?.from, formatDate),
+      end_date: format(dates?.to, formatDate),
+    };
+    let successFunc = (data) => {
+      setForecastedStats(data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, body, successFunc, errorFunc, null, baseURL, true);
+  }, [dates]);
+
+  useEffect(() => {
+    let baseURL = `https://payout-forecast.alphacapitalgroup.uk/`;
+    let query = getQuery();
+    let url = `no_of_payouts/${query}`;
+    let method = "POST";
+    let formatDate = "yyyy-MM-dd";
+    let body = {
+      start_date: format(dates?.from, formatDate),
+      end_date: format(dates?.to, formatDate),
+    };
+    let successFunc = (data) => {
+      setForecastedChartData(data?.data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, body, successFunc, errorFunc, null, baseURL, true);
+  }, [dates]);
 
   return (
     <Card className="p-5 flex flex-col gap-5">
       <CardHeader className="flex flex-col p-0">
         <div className="flex flex-col  items-start gap-2 justify-between xl:flex-row xl:items-center ">
-          <h3 className="font-extrabold text-xl">Payout Forecasting</h3>{" "}
+          <h3 className="font-extrabold text-xl">Payout Forecasting</h3>
           <div className="flex flex-row flex-wrap items-center gap-2.5 xl:flex-nowrap">
-            <PlanTypeFiler data={planTypeData} />
-            <AccountSizeFilter data={accountSizeData} />
-            <DateRangeFilter />{" "}
+            <PlanTypeFiler data={planOptions} setPlantype={setPlantype} />
+            <AccountSizeFilter
+              data={plantype ? planAndDetails?.[plantype] : []}
+              setAccountSize={setAccountSize}
+            />
+            <DateRangeFilter dates={dates} setDates={setDates} />
           </div>
         </div>
       </CardHeader>
@@ -170,12 +218,11 @@ export default function ForecastedPayout() {
           <TextStatsCard
             title="Revenue"
             stats={revenueStats}
-            layout="col" // Use column layout for Revenue card
+            layout="col"
             cardLayout="row"
           />
         </div>
 
-        {/* Actual Payout and Forecasted Payout Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <TextStatsCard
             title="Actual Payout"
@@ -183,34 +230,19 @@ export default function ForecastedPayout() {
             layout="row"
             cardLayout="col"
           />{" "}
-          {/* Use row layout */}
           <TextStatsCard
             title="Forecasted Payout"
             stats={forecastedPayoutStats}
             layout="row"
             cardLayout="col"
           />{" "}
-          {/* Use row layout */}
         </div>
       </div>
-      <ReusableD3BubbleChart
+      {/* <ReusableD3BubbleChart
         data={forecastedPayoutData}
         title="Forecasted No of Payout"
         description="By Month and Payout Amount"
-        labels={[
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ]} // Custom labels
+        labels={uniqueDates}
         seriesColors={{
           "25K": "#FFB6C1", // Light pink
           "50K": "#ADD8E6", // Light blue
@@ -219,9 +251,12 @@ export default function ForecastedPayout() {
           "150K": "#FFA500", // Orange
           "200K": "#FF69B4", // Hot pink
         }} // Custom series colors
-        config={{ yAxisMin: 0, yAxisMax: 500 }} // Optional scale configuration
+        config={{ yAxisMin: 0, yAxisMax: 2500 }}
         footerText="Showing forecasted payouts for 2024"
-      />
+      /> */}
+      <ForecastedPayoutChart chartData={forecastedChartData} />
     </Card>
   );
 }
+
+

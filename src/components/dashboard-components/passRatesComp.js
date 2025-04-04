@@ -8,52 +8,51 @@ import DateRangeFilter from "../rangeFilter";
 import ReusableStackedPieChart from "../stackedPieChart";
 import ReusableSunburstChart from "../stackedPieChart";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { apiFunc } from "@/lib/api";
+import { format, subDays, subMonths } from "date-fns";
 
-export default function PassRates({ data }) {
-  const dummyData = {};
-
-  const planTypeData = [
-    {
-      name: "Stage 1",
-      value: "stage_1",
-    },
-    {
-      name: "Stage 2",
-      value: "stage_2",
-    },
-    {
-      name: "Funded",
-      value: "funded",
-    },
-  ];
-  const accountSizeData = [
-    {
-      name: "5K",
-      value: "5000",
-    },
-    {
-      name: "10K",
-      value: "10000",
-    },
-    {
-      name: "25K",
-      value: "25000",
-    },
-    {
-      name: "50K",
-      value: "50000",
-    },
-    {
-      name: "100K",
-      value: "100000",
-    },
-    {
-      name: "200K",
-      value: "200000",
-    },
-  ];
+export default function PassRates({ planOptions, planAndDetails }) {
+  const [dates, setDates] = useState({
+    from: subMonths(new Date(), 1),
+    to: subDays(new Date(), 1),
+  });
+  const [accountSize, setAccountSize] = useState(null);
+  const [plantype, setPlantype] = useState(null);
   const [accountStatus, setAccountStatus] = useState("active");
+
+  function getQuery() {
+    let query;
+    if (dates) {
+      let formatDate = 'dd/MMM/yyyy';
+      query = `?start_date=${format(dates?.from, formatDate)}&end_date=${format(dates?.to, formatDate)}`
+    }
+    if (plantype) {
+      query += `&plan_type=${plantype}`
+    }
+    if (accountSize) {
+      query += `&account_size=${accountSize}`
+    }
+    return query;
+  }
+
+  useEffect(() => {
+    let method = "GET";
+    let query = getQuery();
+    let url = `${accountStatus === "active" ? "pass-rates" : "fail-rates"}/charts/${query}`;
+    let successFunc = (data) => {
+      console.log("successFunc data : ", data);
+      // setRevenueCardsData(data);
+    };
+    let errorFunc = (error) => {
+      console.log("errorFunc data : ", error);
+    };
+    apiFunc(url, method, null, successFunc, errorFunc);
+  }, [accountStatus, plantype, accountSize, dates]);
+
+  useEffect(() => {
+    console.log(" accountStatus, plantype, accountSize : ", accountStatus, plantype, accountSize, dates)
+  }, [accountStatus, plantype, accountSize, dates])
 
   const tabOptions = [
     {
@@ -75,9 +74,9 @@ export default function PassRates({ data }) {
         <div className="flex flex-col  items-start gap-2 justify-between xl:flex-row xl:items-center ">
           <h3 className="font-extrabold text-xl">Pass Rates</h3>
           <div className="flex flex-row flex-wrap items-center gap-2.5 xl:flex-nowrap">
-            <PlanTypeFiler data={planTypeData} />
-            <AccountSizeFilter data={accountSizeData} />
-            <DateRangeFilter />
+            <PlanTypeFiler data={planOptions} setPlantype={setPlantype} />
+            <AccountSizeFilter data={plantype ? planAndDetails?.[plantype] : []} setAccountSize={setAccountSize} />
+            <DateRangeFilter dates={dates} setDates={setDates} />
           </div>
         </div>
       </CardHeader>
@@ -87,7 +86,7 @@ export default function PassRates({ data }) {
             <TabsList>
               {tabOptions.map((option) => (
                 <TabsTrigger
-                  onClick={() => handleChartToggle(option.value)}
+                  onClick={() => handleTabChange(option.value)}
                   key={option.value}
                   value={option.value}
                 >

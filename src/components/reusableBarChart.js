@@ -73,15 +73,15 @@ export default function ReusableBarChart({
             />{" "}
             {/* Light gray grid for light background */}
             <XAxis
-              dataKey={xAxisKey} // Use dynamic X-axis key from config
+              dataKey={xAxisKey}
               tickLine={false}
               axisLine={false}
-              tickMargin={20} // Increased margin to give more space for labels
-              tickFormatter={(value) => value} // Use the full label value without truncation
-              style={{ fontSize: "12px", fill: "#000000" }} // Black text for light background
-              angle={0} // No rotation for centered labels
-              textAnchor="middle" // Center the labels under the bars
-              height={80} // Increase height to accommodate longer labels
+              tickMargin={20}
+              tickFormatter={(value) => value}
+              style={{ fontSize: "12px", fill: "#000000" }}
+              angle={0}
+              textAnchor="middle"
+              height={80}
             />
             <YAxis
               tickLine={false}

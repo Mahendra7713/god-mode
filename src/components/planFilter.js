@@ -8,7 +8,14 @@ import {
   SelectValue,
 } from "./ui/select";
 
-export default function PlanTypeFiler({ data }) {
+export default function PlanTypeFiler({ data, setPlantype }) {
+
+  function handleValueChange(value) {
+    console.log("value :", value);
+    setPlantype(value);
+  }
+
+  
   return (
     <div className="flex flex-row items-center gap-2.5">
       <Label
@@ -17,7 +24,7 @@ export default function PlanTypeFiler({ data }) {
       >
         Plan Type
       </Label>
-      <Select>
+      <Select onValueChange={handleValueChange}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select a Plan Type" />
         </SelectTrigger>

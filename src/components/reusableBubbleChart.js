@@ -14,20 +14,7 @@ import {
 export default function ReusableD3BubbleChart({
   data, // Required for plotting (array of objects with x, y, r, and series label)
   config = {}, // Optional chart configuration (scales, etc.), defaults to empty object
-  labels = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ], // Optional X-axis labels, defaults to months
+  labels,
   seriesColors = {
     // Optional series colors, defaults to match the image
     "25K": "#FFB6C1", // Light pink
@@ -50,7 +37,7 @@ export default function ReusableD3BubbleChart({
   const [visibleSeries, setVisibleSeries] = useState(
     Object.keys(seriesColors) // State to track which series are visible
   ); // Default to all series visible
-  const [width, setWidth] = useState(customWidth || 1100); // Initialize with customWidth or default 1100
+  const [width, setWidth] = useState(customWidth || 800); // Initialize with customWidth or default 1100
 
   // Use default empty array if data is undefined
   const chartData = data || [];
